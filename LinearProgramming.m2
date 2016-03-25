@@ -24,7 +24,7 @@ newPackage(
 	     {Name => "Branden Stone", Email => "bstone@adelphi.edu", HomePage => "http://math.adelpi.edu/~bstone/"}
 	     },
     	Headline => "LinearProgramming",
-    	DebuggingMode => false,
+    	DebuggingMode => false
 --	PackageExports => {"Graphs", "Posets", "SimplicialComplexes"},
 --	AuxiliaryFiles => true,
 --	Configuration => {"DefaultPath" => null } 
@@ -36,7 +36,8 @@ export {
 
     
     -- Methods
-     "getCurrPath"
+     "getCurrPath",
+     "yourMom"
 
 
 }
@@ -59,8 +60,15 @@ export {
 getCurrPath = method()
 installMethod(getCurrPath, () -> (local currPath; currPath = get "!pwd"; substring(currPath,0,(length currPath)-1)|"/"))
 
-     )
+
+yourMom = method()
+yourMom(List,List) := (L,H) -> (
+    local P;
     
+    P = L|H;
+    
+    return P;
+    )
 
 
 --------------------------------------------------
@@ -109,4 +117,10 @@ end
 
 -- branden
 
+-- start M2 (F12)
+restart
+loadPackage"LinearProgramming"
+getCurrPath()
+yourMom({1,2,3},{4,5,6})
 
+1+2

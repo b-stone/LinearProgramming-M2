@@ -121,6 +121,6 @@ end
 restart
 loadPackage"LinearProgramming"
 getCurrPath()
-yourMom({1,2,3},{4,5,6})
+time yourMom({1,2,3},{4,5,6})
 
 1+2

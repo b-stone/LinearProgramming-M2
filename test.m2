@@ -1,5 +1,3 @@
-
-
 restart
 matrix1 =mutableMatrix{{1/1,3,2,1,0,0,10},{1,5,1,0,1,0,8},{-8,-10,-7,0,0,1,0}} -- had to make a number rational so it stays in the rationals ring
 numberofRows = numRows(matrix1)
@@ -25,6 +23,5 @@ listofpivotcol=flatten(entries((matrix(matrix1))_(colnum)));
 for i from 0 to #listofpivotcol-1 do (if listofpivotcol#i!=1 or 
     listofpivotcol#i!=0 then rowAdd(matrix1,i,-listofpivotcol#i,rownum));
 )
-matrix1
 
 

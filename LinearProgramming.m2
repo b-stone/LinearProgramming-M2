@@ -1,9 +1,8 @@
 ---------------------------------------------------------------------------
--- PURPOSE : Visualize package for Macaulay2 provides the ability to 
--- visualize various algebraic objects in java script using a 
--- modern browser.
+-- PURPOSE : LinearPrograming is a package for Macaulay2 and is
+-- an implementation of various linear programing methods.
 --
--- Copyright (C) 2013 Branden Stone and Jim Vallandingham
+-- Copyright (C) 2016 Branden Stone and Tom Enkosky
 --
 -- This program is free software; you can redistribute it and/or
 -- modify it under the terms of the GNU General Public License version 2

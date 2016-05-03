@@ -21,7 +21,9 @@ newPackage(
     	Version => "0.1", 
     	Date => "March 25, 2016",
     	Authors => {       
-	     {Name => "Branden Stone", Email => "bstone@adelphi.edu", HomePage => "http://math.adelpi.edu/~bstone/"}
+	     {Name => "Branden Stone", Email => "bstone@adelphi.edu", HomePage => "http://math.adelpi.edu/~bstone/"},
+     	     {Name => "Thomas Enkosky", Email => "tenkosky@gmail.com"},
+	     {Name => "Harmit Minhas", Email => "harmitminhas@mail.adelphi.edu"}	     
 	     },
     	Headline => "LinearProgramming",
     	DebuggingMode => false
@@ -33,12 +35,14 @@ newPackage(
 export {
     
     -- Options
-
+     "Optimize",
     
     -- Methods
-     "getCurrPath",
-     "yourMom"
-
+     "SimplexProc",
+     "getMaxCoordinates",
+     "getMinCoordinates",
+     "rref",
+     "simplex"
 
 }
 
@@ -54,21 +58,191 @@ export {
 -- METHODS
 ------------------------------------------------------------
 
--- Input: None.
--- Output: String containing current path.
 
-getCurrPath = method()
-installMethod(getCurrPath, () -> (local currPath; currPath = get "!pwd"; substring(currPath,0,(length currPath)-1)|"/"))
+-- Input: Mutable Matrix
+
+-- Output: Mutable Matrix
+
+-- Description:
+-- Given a matrix that is in the order (restraint functions coefficients|slack variables for restraints|Constants)
+--    	      	      	      	       (cost function coeeficients      |slack variable for cost       |   0     )
+-- This method applies the simplex method to that matrix
+
+SimplexProc=method()
+SimplexProc(MutableMatrix) :=  matrix1  -> (
+local numberofRows;local isThereANeg;local lastrow;local listoflast;local coordinates;
+local listofpivotcol;local listoflastcol;local smallestrow;local rownum;local matrix1;
+local smallest;local pivcol;local listofdividends;
+
+matrix1=mutableMatrix(sub(matrix(matrix1),RR));	   --Forces the matrix to be in the reals
+numberofRows = numRows(matrix1);
+isThereANeg=true;    --Condition for the while loop, checks if there is a negative in the last row of the matrix
+while isThereANeg do(
+lastrow=matrix1^{numberofRows-1};
+listoflast=flatten(entries(lastrow));
+isThereANeg=false;
+for i from 0 to #listoflast-2 do(if listoflast#i<0 then isThereANeg=true);    -- Checks if there is a negative in the final row
+if isThereANeg==false then break;    -- Ends the loop, if there are no more negatives in the last row
+--Finding most negative number and working with its column
+smallest=min(listoflast);
+colnum=position(listoflast,i-> i == smallest);
+pivcol=(matrix(matrix1))_(colnum);    --The column that has the most negative value in the last row
+--Comparing the pivotcolumn with the last column to see which row we reduce around
+listofpivotcol=flatten(entries(pivcol));
+listofpivotcol=remove(listofpivotcol,length(listofpivotcol)-1);	   -- Removing the last value of the pivot column, because it is not used in comparing process
+listoflastcol=flatten(entries((matrix(matrix1))_(numColumns(matrix1)-1)));
+listoflastcol=remove(listoflastcol,length(listoflastcol)-1);
+listofdividends=apply(listoflastcol,listofpivotcol,(i,j)->i/j);	   --Finding the ratios between the last columns entries and respective pivot column entries
+smallestrow=min(listofdividends);    	     	     	     	     
+rownum=position(listofdividends,i->i==smallestrow);    --Finds the row that will be pivoted around, by picking the largest, or rather smallest since they are negative, ratio
+--Reducing the row the element we are pivoting around
+matrix1=rowMult(matrix1,rownum,(1/(listofpivotcol#rownum)));
+listofpivotcol=flatten(entries((matrix(matrix1))_(colnum)));
+--Reduces other rows around the pivotcolumn
+for i from 0 to #listofpivotcol-1 do (if listofpivotcol#i!=1 or 
+    listofpivotcol#i!=0 then rowAdd(matrix1,i,-listofpivotcol#i,rownum));
+);
+return matrix1;
+)
 
 
-yourMom = method()
-yourMom(List,List) := (L,H) -> (
-    local P;
+--++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+-- Input: Mutable Matrix
+-- Output: List of numbers
+-- Description: 
+-- Given a matrix that had the simplex method applied to it
+-- for maximization, this will return the coefficients of the
+-- cost function, in order to maxmize the cost value.
+getMaxCoordinates=method()
+getMaxCoordinates(MutableMatrix):= matrix1 -> (
+local count; local numOfVars;local listofcol;local rowpos;local coordinates;
+local listoflastcol; local count;
+
+
+count=0; 
+listoflastcol=flatten(entries((matrix(matrix1))_(numColumns(matrix1)-1)));
+coordinates=new BasicList;
+numOfVars=numColumns(matrix1)-numRows(matrix1)-1;    --Figures out the number of variables not including the slacks
+--If a column for the variable has more than one coefficient for it, that variable is set to 0, otherwise it is given the value in the respective row
+for i from 0 to numOfVars-1 do(
+    count=0;
+    listofcol=flatten(entries((matrix(matrix1))_i));
+    for j from 0 to #listoflastcol-1 do(if listofcol#j!=0 then count=count+1);
+    if count==1 then (
+    	rowpos = position(listofcol,i-> i != 0);
+	listoflastcol=flatten(entries((matrix(matrix1))_(numColumns(matrix1)-1)));
+    	coordinates=append(coordinates,listoflastcol#rowpos);
+	);
+    if count!=1 then coordinates=append(coordinates,0);
+    );
+return coordinates;
+)
+
+--++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+
+-- Input: Mutable Matrix
+-- Output: List of numbers
+-- Description: 
+-- Given a matrix that had the simplex method applied to it
+-- for minimizationn, this will return the coefficients of the
+-- cost function, in order to minimize the cost value.
+getMinCoordinates=method()
+getMinCoordinates(MutableMatrix):= matrix1 ->(
+local coordinates; local numOfVars; local lastrow; local loopstop;
+
+coordinates=new BasicList;
+numOfVars=numColumns(matrix1)-numRows(matrix1)-1;    --Figures out the number of variables, not including slacks
+lastrow=flatten(entries(matrix1^{numRows(matrix1)-1}));	   
+loopstop=numColumns(matrix1)-3;	   
+for i from numOfVars to loopstop do(coordinates=append(coordinates,lastrow#i); );    --The numbers at these locations are the coordinates for minimizing the cost
+return coordinates;
+)
+--++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+-- Input: Mutable Matrix
+
+-- Output: Mutable Matrix
+
+-- Description: 
+-- This method will put the given matrix
+-- into row reduced echelon form.
+rref=method()
+rref(MutableMatrix) :=  matrix2  -> (
+local count;local row;local matrix2;local changerow;    
     
-    P = L|H;
+count=numRows(matrix2)-1;
+for j from 0 to count do(
+    row=flatten(entries(matrix2^{j}));
+    if row#j != 0 then(
+    matrix2=rowMult(matrix2,j,1/row#j);	   --Divideds the row by the pivot value
+    row=flatten(entries(matrix2^{j}));	  
+    for i from 0 to count do(
+	if j!=i then(
+	    changerow=flatten(entries(matrix2^{i}));	--Gets the next row that needs to be reduced around the pivot
+	    matrix2=rowAdd(matrix2,i,-changerow#j/row#j,j);
+	   );
+	);
+    );
+);
+return matrix2;
+)
+  
+--++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+
+-- Input: A List of Lists and Option
+
+-- Output: A Matrix, List of Numbers (The values of the variables to optimize), and A Number (The max/min cost value)
+
+-- Description: 
+-- This applies the simplex method to a given list of lists. It will minimize or maximize, depending
+-- on what the user opts to do.
+
+-- Additional/Necessary Information:
+-- The list of list should have the order: restraints followed by cost function.
+-- A list inside the list should be: coefficient 1, coefficient 2, etc, restraint constant. 
+-- Cost functions should be set to 0.
+-- All the variables should be restrained by 0. 
+-- Restraint functions should be set to be greater than or equal to a constant for minimization.
+-- Restraint functions should be set to be less than or equal to a constant for maximization.
+
+simplex=method(Options=> {Optimize=>Max})
+simplex(List) := opts-> list1  -> (   
+local newList; local tempList; local tempElement; 
+local count; local matrix1; local coordinates; local list1;
+
     
-    return P;
-    )
+    if opts.Optimize==Min then(list1 = entries(transpose(matrix(list1))););    --If we want to minimize, we must do the dual and therefore need the transpose of the coefficients we are given
+    newList=new List;
+    for i from 0 to #list1-1 do(
+       	tempList=list1#i;    --Gets the list we wish to add extra slack variables
+       	tempElement=tempList#(#tempList-1);    --The constant for the cost function is placed after the slacks
+       	tempList=remove(tempList,#tempList-1);
+       	count=#list1-1;
+	--Slacks are added as an identity in between the non-slack variables and their respective constant restraints
+       	for j from 0 to count  do(
+	    if j==count and i==j then tempList=append(tempList,-1);
+	    if j==i and j!=count then tempList= append(tempList,1);
+	    if j!=i then tempList= append(tempList,0);
+	    );
+       	tempList=append(tempList,tempElement);
+       	newList=append(newList,tempList);
+       	);
+    
+    --The simplex procedure is done on the matrix
+    matrix1=mutableMatrix(newList);
+    matrix1=rowMult(matrix1,numRows(matrix1)-1,-1);
+    matrix1=SimplexProc(matrix1);
+    
+    --Coordinates are found depending on goal of our optimiziation
+    if opts.Optimize==Max then coordinates = getMaxCoordinates(matrix1);
+    if opts.Optimize==Min then coordinates = getMinCoordinates(matrix1);
+    optimizedCost=matrix1_(numRows(matrix1)-1,numColumns(matrix1)-1);
+    return {matrix(matrix1),coordinates,optimizedCost};
+ )
+
 
 
 --------------------------------------------------
@@ -100,27 +274,40 @@ end
 
 -- harmit
 
+restart
+loadPackage "LinearProgramming"
+
+--Sample maximization problems
+maxSample = {{1,3,2,10},{1,5,1,8},{8,10,7,0}}
+maxSample = {{2,1,1,14},{4,2,3,28},{2,5,5,30},{1,2,-1,0}}
+
+simplex(maxSample,Optimize=>Max)
 
 
+--Sample minimization problem
+minSample = {{3,2,2},{5,1,3},{29,10,0}}
+minSample = {{60,60,300},{12,6,36},{10,30,90},{.12,.15,0}}
+
+simplex(minSample,Optimize=>Min)
 
 
-
-
--- sarthak
-
-
-
-
+--Sample rref problems
+matrix2=mutableMatrix(sub(matrix{{1,1,1,-1},{1,2,4,3},{1,3,9,3}},QQ))
+matrix2=mutableMatrix(sub(matrix{{1,2,1},{-2,-3,1},{3,5,0}},QQ))
+	    
+rref(matrix2)
+rank matrix2	    
 
 
 
 
 -- branden
 
--- start M2 (F12)
 restart
 loadPackage"LinearProgramming"
-getCurrPath()
-time yourMom({1,2,3},{4,5,6})
 
-1+2
+
+
+
+
+-- tom

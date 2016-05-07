@@ -72,9 +72,13 @@ export {
 SimplexProc=method()
 -- T$ change to get rid of MutableMatrix so user enters Matrix
 SimplexProc(Matrix) :=  matrix1  -> (
-    local numberofRows;local isThereANeg;local lastrow;local listoflast;local coordinates;
+    local numberofRows;local isThereANeg;local lastrow;
+    --local listoflast;
+    local coordinates;
     local listofpivotcol;local listoflastcol;local smallestrow;local rownum;local matrix1;
-    local smallest;local pivcol;local listofdividends;local colnum;
+    local smallest;
+    --local pivcol;
+    local listofdividends;local colnum;
 
     --Forces the matrix to be in the reals
     matrix1=sub(matrix1,RR);	   
@@ -93,7 +97,6 @@ SimplexProc(Matrix) :=  matrix1  -> (
     	-- pivcol is the column of the matrix with the smallest entry in the last row
     	colnum=position(lastrow,i-> i == smallest);
   --  	pivcol=(matrix1)_(colnum);    --The column that has the most negative value in the last row
- 
         -- Comparing the pivotcolumn with the last column to see which row we reduce around
     	listofpivotcol=flatten(entries((matrix1)_(colnum)));
     

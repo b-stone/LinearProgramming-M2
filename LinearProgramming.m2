@@ -92,10 +92,10 @@ SimplexProc(Matrix) :=  matrix1  -> (
 	     
     	-- pivcol is the column of the matrix with the smallest entry in the last row
     	colnum=position(lastrow,i-> i == smallest);
-    	pivcol=(matrix1)_(colnum);    --The column that has the most negative value in the last row
+  --  	pivcol=(matrix1)_(colnum);    --The column that has the most negative value in the last row
  
         -- Comparing the pivotcolumn with the last column to see which row we reduce around
-    	listofpivotcol=flatten(entries(pivcol));
+    	listofpivotcol=flatten(entries((matrix1)_(colnum)));
     
         -- Removing the last value of the pivot column, because it is not used in comparing process
     	listofpivotcol=remove(listofpivotcol,length(listofpivotcol)-1);	   

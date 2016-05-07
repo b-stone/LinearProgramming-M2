@@ -105,16 +105,22 @@ while isThereANeg do(
     smallest=min(listoflast);
     	if smallest>=0 then break; -- if there are no negatives in the list, then break loop
 	
+    -- pivcol is the column of the matrix with the smallest entry in the last row
     colnum=position(listoflast,i-> i == smallest);
     pivcol=(matrix1)_(colnum);    --The column that has the most negative value in the last row
  
     --Comparing the pivotcolumn with the last column to see which row we reduce around
     listofpivotcol=flatten(entries(pivcol));
-    listofpivotcol=remove(listofpivotcol,length(listofpivotcol)-1);	   -- Removing the last value of the pivot column, because it is not used in comparing process
+    
+    -- Removing the last value of the pivot column, because it is not used in comparing process
+    listofpivotcol=remove(listofpivotcol,length(listofpivotcol)-1);	   
 
     listoflastcol=flatten(entries(matrix1)_(numColumns(matrix1)-1)));
     listoflastcol=remove(listoflastcol,length(listoflastcol)-1);
-    listofdividends=apply(listoflastcol,listofpivotcol,(i,j)->i/j);	   --Finding the ratios between the last columns entries and respective pivot column entries
+    
+    --Finding the ratios between the last columns entries and respective pivot column entries
+    -- T$: this may divide by 0!!!!!!!
+    listofdividends=apply(listoflastcol,listofpivotcol,(i,j)->i/j);	   
 
     smallestrow=min(listofdividends);    	     	     	     	     
     rownum=position(listofdividends,i->i==smallestrow);    --Finds the row that will be pivoted around, by picking the largest, or rather smallest since they are negative, ratio

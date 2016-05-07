@@ -117,14 +117,20 @@ SimplexProc(Matrix) :=  matrix1  -> (
 -- %%%%%%%%%%%%%%%%%%%
  
         --Reducing the row the element we are pivoting around
-    	matrix1=rowMult(matrix1,rownum,(1/(listofpivotcol#rownum)));
+    	matrix1=rowMult(mutableMatrix(matrix1),rownum,(1/(listofpivotcol#rownum)));
     	listofpivotcol=flatten(entries((matrix1)_(colnum)));
 
         --Reduces other rows around the pivotcolumn
-    	for i from 0 to #listofpivotcol-1 do (if listofpivotcol#i!=1 or 
+    	for i from 0 to #listofpivotcol-1 do (
+	    if listofpivotcol#i!=1 or 
     	    listofpivotcol#i!=0 then rowAdd(matrix1,i,-listofpivotcol#i,rownum));
-    
+	
+	matrix1=matrix(matrix1);
+	
     -- T$ need to find new smallest of the last row otherwise loop won't end
+        lastrow=flatten(entries(matrix1^{numRows(matrix1)-1}));
+    	smallest=min(lastrow);
+
     );
 return matrix(matrix1);-- T$ change to convert matrix1 to matrix
 )

@@ -76,12 +76,11 @@ SimplexProc(Matrix) :=  matrix1  -> (
     local listofpivotcol;local listoflastcol;local smallestrow;local rownum;local matrix1;
     local smallest;local pivcol;local listofdividends;local colnum;
 
-    matrix1=sub(matrix1,RR);	   --Forces the matrix to be in the reals
+    --Forces the matrix to be in the reals
+    matrix1=sub(matrix1,RR);	   
     numberofRows = numRows(matrix1);
 
     isThereANeg=true;    --Condition for the while loop, checks if there is a negative in the last row of the matrix
-    -- T$ comment:
-    -- I don't think this while loop does whatever it is that it's supposed to do
 
     while isThereANeg do(
     	lastrow=matrix1^{numberofRows-1};
@@ -101,26 +100,26 @@ SimplexProc(Matrix) :=  matrix1  -> (
         -- Removing the last value of the pivot column, because it is not used in comparing process
     	listofpivotcol=remove(listofpivotcol,length(listofpivotcol)-1);	   
 
-        listoflastcol=flatten(entries(matrix1)_(numColumns(matrix1)-1)));
+        listoflastcol=flatten(entries((matrix1)_(numColumns(matrix1)-1)));
     
-    listoflastcol=remove(listoflastcol,length(listoflastcol)-1);
+        listoflastcol=remove(listoflastcol,length(listoflastcol)-1);
     
         -- Finding the ratios between the last columns entries and respective pivot column entries
         -- T$: this may divide by 0!!!!!!!
-        listofdividends=apply(listoflastcol,listofpivotcol,(i,j)->i/j);	   
+    	listofdividends=apply(listoflastcol,listofpivotcol,(i,j)->i/j);	   
 
         smallestrow=min(listofdividends);    	     	   
     
         --Finds the row that will be pivoted around, by picking the largest, or rather smallest since they are negative, ratio  	     	     
-        rownum=position(listofdividends,i->i==smallestrow);    
+    	rownum=position(listofdividends,i->i==smallestrow);    
  
-    --Reducing the row the element we are pivoting around
-    matrix1=rowMult(matrix1,rownum,(1/(listofpivotcol#rownum)));
-    listofpivotcol=flatten(entries(matrix1)_(colnum)));
+        --Reducing the row the element we are pivoting around
+    	matrix1=rowMult(matrix1,rownum,(1/(listofpivotcol#rownum)));
+    	listofpivotcol=flatten(entries((matrix1)_(colnum)));
 
-    --Reduces other rows around the pivotcolumn
-    for i from 0 to #listofpivotcol-1 do (if listofpivotcol#i!=1 or 
-    	listofpivotcol#i!=0 then rowAdd(matrix1,i,-listofpivotcol#i,rownum));
+        --Reduces other rows around the pivotcolumn
+    	for i from 0 to #listofpivotcol-1 do (if listofpivotcol#i!=1 or 
+    	    listofpivotcol#i!=0 then rowAdd(matrix1,i,-listofpivotcol#i,rownum));
     );
 return matrix(matrix1);-- T$ change to convert matrix1 to matrix
 )

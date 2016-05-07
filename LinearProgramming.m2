@@ -78,12 +78,13 @@ local smallest;local pivcol;local listofdividends;local colnum;
 -- T$ change to add local variable matrix2 (I don't think I need this)
 local matrix2;
 
-matrix1=mutableMatrix(sub(matrix1,RR));	   --Forces the matrix to be in the reals
+matrix1=sub(matrix1,RR);	   --Forces the matrix to be in the reals
 numberofRows = numRows(matrix1);
 
 isThereANeg=true;    --Condition for the while loop, checks if there is a negative in the last row of the matrix
 -- T$ comment:
 -- I don't think this while loop does whatever it is that it's supposed to do
+
 while isThereANeg do(
     lastrow=matrix1^{numberofRows-1};
     listoflast=flatten(entries(lastrow));
@@ -102,25 +103,30 @@ while isThereANeg do(
 --%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
     smallest=min(listoflast);
-    	if smallest>=0 then break;
+    	if smallest>=0 then break; -- if there are no negatives in the list, then break loop
 	
     colnum=position(listoflast,i-> i == smallest);
-    pivcol=(matrix(matrix1))_(colnum);    --The column that has the most negative value in the last row
+    pivcol=(matrix1)_(colnum);    --The column that has the most negative value in the last row
+ 
     --Comparing the pivotcolumn with the last column to see which row we reduce around
     listofpivotcol=flatten(entries(pivcol));
     listofpivotcol=remove(listofpivotcol,length(listofpivotcol)-1);	   -- Removing the last value of the pivot column, because it is not used in comparing process
-    listoflastcol=flatten(entries((matrix(matrix1))_(numColumns(matrix1)-1)));
+
+    listoflastcol=flatten(entries(matrix1)_(numColumns(matrix1)-1)));
     listoflastcol=remove(listoflastcol,length(listoflastcol)-1);
     listofdividends=apply(listoflastcol,listofpivotcol,(i,j)->i/j);	   --Finding the ratios between the last columns entries and respective pivot column entries
+
     smallestrow=min(listofdividends);    	     	     	     	     
     rownum=position(listofdividends,i->i==smallestrow);    --Finds the row that will be pivoted around, by picking the largest, or rather smallest since they are negative, ratio
+ 
     --Reducing the row the element we are pivoting around
     matrix1=rowMult(matrix1,rownum,(1/(listofpivotcol#rownum)));
-    listofpivotcol=flatten(entries((matrix(matrix1))_(colnum)));
+    listofpivotcol=flatten(entries(matrix1)_(colnum)));
+
     --Reduces other rows around the pivotcolumn
     for i from 0 to #listofpivotcol-1 do (if listofpivotcol#i!=1 or 
     	listofpivotcol#i!=0 then rowAdd(matrix1,i,-listofpivotcol#i,rownum));
-);
+    );
 return matrix(matrix1);-- T$ change to convert matrix1 to matrix
 )
 

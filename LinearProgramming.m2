@@ -83,11 +83,8 @@ SimplexProc(Matrix) :=  matrix1  -> (
     --Forces the matrix to be in the reals
     matrix1=sub(matrix1,RR);	   
     numberofRows = numRows(matrix1);
-
---    isThereANeg=true;    --Condition for the while loop, checks if there is a negative in the last row of the matrix
     	
     -- initialize to smallest entry of cost function
---    lastrow=matrix1^{numberofRows-1}; T$: this line is useless
     lastrow=flatten(entries(matrix1^{numberofRows-1}));
     smallest=min(lastrow);
 
@@ -107,7 +104,8 @@ SimplexProc(Matrix) :=  matrix1  -> (
     
         -- Finding the ratios between the last columns entries and respective pivot column entries
         -- T$: this may divide by 0!!!!!!!
-    	listofdividends=apply(listoflastcol,listofpivotcol,(i,j)->i/j);	   
+    	listofdividends=apply(listoflastcol,listofpivotcol,(i,j)->(
+		if j==0 then infinity else i/j);	   
 
         smallestrow=min(listofdividends);    	     	   
     

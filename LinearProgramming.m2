@@ -72,10 +72,13 @@ export {
 SimplexProc=method()
 -- T$ change to get rid of MutableMatrix so user enters Matrix
 SimplexProc(Matrix) :=  matrix1  -> (
-    local numberofRows;local isThereANeg;local lastrow;
+    --local numberofRows;
+    local isThereANeg;local lastrow;
     --local listoflast;
     local coordinates;
-    local listofpivotcol;local listoflastcol;local smallestrow;local rownum;local matrix1;
+    local listofpivotcol;local listoflastcol;
+    --local smallestrow;
+    local rownum;local matrix1;
     local smallest;
     --local pivcol;
     local listofdividends;local colnum;
@@ -85,15 +88,17 @@ SimplexProc(Matrix) :=  matrix1  -> (
     numberofRows = numRows(matrix1);
     	
     -- initialize to smallest entry of cost function
-    lastrow=flatten(entries(matrix1^{numberofRows-1}));
+    lastrow=flatten(entries(matrix1^{numRows(matrix1)-1}));
     smallest=min(lastrow);
 
-    -- if there are no negatives in the list, then break loop
+    -- if there are no negatives in the list, then we are done
     while smallest < 0 do(
+-- %%%%%%%%%%%%%%%%
+-- This section first finds which row we apply row reduction to
 	     
     	-- pivcol is the column of the matrix with the smallest entry in the last row
     	colnum=position(lastrow,i-> i == smallest);
-  --  	pivcol=(matrix1)_(colnum);    --The column that has the most negative value in the last row
+ 
         -- Comparing the pivotcolumn with the last column to see which row we reduce around
     	listofpivotcol=flatten(entries((matrix1)_(colnum)));
     
@@ -103,14 +108,13 @@ SimplexProc(Matrix) :=  matrix1  -> (
         listoflastcol=remove(listoflastcol,length(listoflastcol)-1);
     
         -- Finding the ratios between the last columns entries and respective pivot column entries
-        -- T$: this may divide by 0!!!!!!!
     	listofdividends=apply(listoflastcol,listofpivotcol,(i,j)->(
 		if j==0 then infinity else i/j);	   
 
-        smallestrow=min(listofdividends);    	     	   
-    
-        --Finds the row that will be pivoted around, by picking the largest, or rather smallest since they are negative, ratio  	     	     
-    	rownum=position(listofdividends,i->i==smallestrow);    
+       	-- This is the row we select for our row operations
+    	rownum=position(listofdividends,i->i==min(listofdividends));    
+--        smallestrow=min(listofdividends);    	     	   
+-- %%%%%%%%%%%%%%%%%%%
  
         --Reducing the row the element we are pivoting around
     	matrix1=rowMult(matrix1,rownum,(1/(listofpivotcol#rownum)));

@@ -72,58 +72,47 @@ export {
 SimplexProc=method()
 -- T$ change to get rid of MutableMatrix so user enters Matrix
 SimplexProc(Matrix) :=  matrix1  -> (
-local numberofRows;local isThereANeg;local lastrow;local listoflast;local coordinates;
-local listofpivotcol;local listoflastcol;local smallestrow;local rownum;local matrix1;
-local smallest;local pivcol;local listofdividends;local colnum;
--- T$ change to add local variable matrix2 (I don't think I need this)
-local matrix2;
+    local numberofRows;local isThereANeg;local lastrow;local listoflast;local coordinates;
+    local listofpivotcol;local listoflastcol;local smallestrow;local rownum;local matrix1;
+    local smallest;local pivcol;local listofdividends;local colnum;
 
-matrix1=sub(matrix1,RR);	   --Forces the matrix to be in the reals
-numberofRows = numRows(matrix1);
+    matrix1=sub(matrix1,RR);	   --Forces the matrix to be in the reals
+    numberofRows = numRows(matrix1);
 
-isThereANeg=true;    --Condition for the while loop, checks if there is a negative in the last row of the matrix
--- T$ comment:
--- I don't think this while loop does whatever it is that it's supposed to do
+    isThereANeg=true;    --Condition for the while loop, checks if there is a negative in the last row of the matrix
+    -- T$ comment:
+    -- I don't think this while loop does whatever it is that it's supposed to do
 
-while isThereANeg do(
-    lastrow=matrix1^{numberofRows-1};
-    listoflast=flatten(entries(lastrow));
+    while isThereANeg do(
+    	lastrow=matrix1^{numberofRows-1};
+    	listoflast=flatten(entries(lastrow));
     
---%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
--- T$ edit.  getting rid of the loop to check for negatives.  can check with min(listoflast)
-
---    isThereANeg=false;  
-
---    for i from 0 to #listoflast-2 do(if listoflast#i<0 then isThereANeg=true);    -- Checks if there is a negative in the final row
-
--- 
---    if isThereANeg==false then break;    -- Ends the loop, if there are no more negatives in the last row
-
-    --Finding most negative number and working with its column
---%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-    smallest=min(listoflast);
-    	if smallest>=0 then break; -- if there are no negatives in the list, then break loop
+         smallest=min(listoflast);
+	     -- if there are no negatives in the list, then break loop
+	     if smallest>=0 then break; 
 	
-    -- pivcol is the column of the matrix with the smallest entry in the last row
-    colnum=position(listoflast,i-> i == smallest);
-    pivcol=(matrix1)_(colnum);    --The column that has the most negative value in the last row
+    	-- pivcol is the column of the matrix with the smallest entry in the last row
+    	colnum=position(listoflast,i-> i == smallest);
+    	pivcol=(matrix1)_(colnum);    --The column that has the most negative value in the last row
  
-    --Comparing the pivotcolumn with the last column to see which row we reduce around
-    listofpivotcol=flatten(entries(pivcol));
+        -- Comparing the pivotcolumn with the last column to see which row we reduce around
+    	listofpivotcol=flatten(entries(pivcol));
     
-    -- Removing the last value of the pivot column, because it is not used in comparing process
-    listofpivotcol=remove(listofpivotcol,length(listofpivotcol)-1);	   
+        -- Removing the last value of the pivot column, because it is not used in comparing process
+    	listofpivotcol=remove(listofpivotcol,length(listofpivotcol)-1);	   
 
-    listoflastcol=flatten(entries(matrix1)_(numColumns(matrix1)-1)));
+        listoflastcol=flatten(entries(matrix1)_(numColumns(matrix1)-1)));
+    
     listoflastcol=remove(listoflastcol,length(listoflastcol)-1);
     
-    --Finding the ratios between the last columns entries and respective pivot column entries
-    -- T$: this may divide by 0!!!!!!!
-    listofdividends=apply(listoflastcol,listofpivotcol,(i,j)->i/j);	   
+        -- Finding the ratios between the last columns entries and respective pivot column entries
+        -- T$: this may divide by 0!!!!!!!
+        listofdividends=apply(listoflastcol,listofpivotcol,(i,j)->i/j);	   
 
-    smallestrow=min(listofdividends);    	     	     	     	     
-    rownum=position(listofdividends,i->i==smallestrow);    --Finds the row that will be pivoted around, by picking the largest, or rather smallest since they are negative, ratio
+        smallestrow=min(listofdividends);    	     	   
+    
+        --Finds the row that will be pivoted around, by picking the largest, or rather smallest since they are negative, ratio  	     	     
+        rownum=position(listofdividends,i->i==smallestrow);    
  
     --Reducing the row the element we are pivoting around
     matrix1=rowMult(matrix1,rownum,(1/(listofpivotcol#rownum)));

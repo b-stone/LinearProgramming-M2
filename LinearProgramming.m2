@@ -87,16 +87,23 @@ isThereANeg=true;    --Condition for the while loop, checks if there is a negati
 while isThereANeg do(
     lastrow=matrix1^{numberofRows-1};
     listoflast=flatten(entries(lastrow));
-    isThereANeg=false;
+    
+--%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+-- T$ edit.  getting rid of the loop to check for negatives.  can check with min(listoflast)
 
-    for i from 0 to #listoflast-2 do(if listoflast#i<0 then isThereANeg=true);    -- Checks if there is a negative in the final row
+--    isThereANeg=false;  
 
--- T$: 
-    if isThereANeg==false then break;    -- Ends the loop, if there are no more negatives in the last row
+--    for i from 0 to #listoflast-2 do(if listoflast#i<0 then isThereANeg=true);    -- Checks if there is a negative in the final row
+
+-- 
+--    if isThereANeg==false then break;    -- Ends the loop, if there are no more negatives in the last row
 
     --Finding most negative number and working with its column
+--%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
     smallest=min(listoflast);
+    	if smallest>=0 then break;
+	
     colnum=position(listoflast,i-> i == smallest);
     pivcol=(matrix(matrix1))_(colnum);    --The column that has the most negative value in the last row
     --Comparing the pivotcolumn with the last column to see which row we reduce around

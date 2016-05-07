@@ -35,6 +35,8 @@ export {
     
     -- Options
      "Optimize",
+     "Max",
+     "Min",
     
     -- Methods
      "SimplexProc",
@@ -58,9 +60,9 @@ export {
 ------------------------------------------------------------
 
 
--- Input: Mutable Matrix
+-- Input: Mutable Matrix -- T$ change to just Matrix
 
--- Output: Mutable Matrix
+-- Output: Mutable Matrix -- T$ change to just Marix
 
 -- Description:
 -- Given a matrix that is in the order (restraint functions coefficients|slack variables for restraints|Constants)
@@ -68,40 +70,51 @@ export {
 -- This method applies the simplex method to that matrix
 
 SimplexProc=method()
-SimplexProc(MutableMatrix) :=  matrix1  -> (
+-- T$ change to get rid of MutableMatrix so user enters Matrix
+SimplexProc(Matrix) :=  matrix1  -> (
 local numberofRows;local isThereANeg;local lastrow;local listoflast;local coordinates;
 local listofpivotcol;local listoflastcol;local smallestrow;local rownum;local matrix1;
-local smallest;local pivcol;local listofdividends;
+local smallest;local pivcol;local listofdividends;local colnum;
+-- T$ change to add local variable matrix2 (I don't think I need this)
+local matrix2;
 
-matrix1=mutableMatrix(sub(matrix(matrix1),RR));	   --Forces the matrix to be in the reals
+matrix1=mutableMatrix(sub(matrix1,RR));	   --Forces the matrix to be in the reals
 numberofRows = numRows(matrix1);
+
 isThereANeg=true;    --Condition for the while loop, checks if there is a negative in the last row of the matrix
+-- T$ comment:
+-- I don't think this while loop does whatever it is that it's supposed to do
 while isThereANeg do(
-lastrow=matrix1^{numberofRows-1};
-listoflast=flatten(entries(lastrow));
-isThereANeg=false;
-for i from 0 to #listoflast-2 do(if listoflast#i<0 then isThereANeg=true);    -- Checks if there is a negative in the final row
-if isThereANeg==false then break;    -- Ends the loop, if there are no more negatives in the last row
---Finding most negative number and working with its column
-smallest=min(listoflast);
-colnum=position(listoflast,i-> i == smallest);
-pivcol=(matrix(matrix1))_(colnum);    --The column that has the most negative value in the last row
---Comparing the pivotcolumn with the last column to see which row we reduce around
-listofpivotcol=flatten(entries(pivcol));
-listofpivotcol=remove(listofpivotcol,length(listofpivotcol)-1);	   -- Removing the last value of the pivot column, because it is not used in comparing process
-listoflastcol=flatten(entries((matrix(matrix1))_(numColumns(matrix1)-1)));
-listoflastcol=remove(listoflastcol,length(listoflastcol)-1);
-listofdividends=apply(listoflastcol,listofpivotcol,(i,j)->i/j);	   --Finding the ratios between the last columns entries and respective pivot column entries
-smallestrow=min(listofdividends);    	     	     	     	     
-rownum=position(listofdividends,i->i==smallestrow);    --Finds the row that will be pivoted around, by picking the largest, or rather smallest since they are negative, ratio
---Reducing the row the element we are pivoting around
-matrix1=rowMult(matrix1,rownum,(1/(listofpivotcol#rownum)));
-listofpivotcol=flatten(entries((matrix(matrix1))_(colnum)));
---Reduces other rows around the pivotcolumn
-for i from 0 to #listofpivotcol-1 do (if listofpivotcol#i!=1 or 
-    listofpivotcol#i!=0 then rowAdd(matrix1,i,-listofpivotcol#i,rownum));
+    lastrow=matrix1^{numberofRows-1};
+    listoflast=flatten(entries(lastrow));
+    isThereANeg=false;
+
+    for i from 0 to #listoflast-2 do(if listoflast#i<0 then isThereANeg=true);    -- Checks if there is a negative in the final row
+
+-- T$: 
+    if isThereANeg==false then break;    -- Ends the loop, if there are no more negatives in the last row
+
+    --Finding most negative number and working with its column
+
+    smallest=min(listoflast);
+    colnum=position(listoflast,i-> i == smallest);
+    pivcol=(matrix(matrix1))_(colnum);    --The column that has the most negative value in the last row
+    --Comparing the pivotcolumn with the last column to see which row we reduce around
+    listofpivotcol=flatten(entries(pivcol));
+    listofpivotcol=remove(listofpivotcol,length(listofpivotcol)-1);	   -- Removing the last value of the pivot column, because it is not used in comparing process
+    listoflastcol=flatten(entries((matrix(matrix1))_(numColumns(matrix1)-1)));
+    listoflastcol=remove(listoflastcol,length(listoflastcol)-1);
+    listofdividends=apply(listoflastcol,listofpivotcol,(i,j)->i/j);	   --Finding the ratios between the last columns entries and respective pivot column entries
+    smallestrow=min(listofdividends);    	     	     	     	     
+    rownum=position(listofdividends,i->i==smallestrow);    --Finds the row that will be pivoted around, by picking the largest, or rather smallest since they are negative, ratio
+    --Reducing the row the element we are pivoting around
+    matrix1=rowMult(matrix1,rownum,(1/(listofpivotcol#rownum)));
+    listofpivotcol=flatten(entries((matrix(matrix1))_(colnum)));
+    --Reduces other rows around the pivotcolumn
+    for i from 0 to #listofpivotcol-1 do (if listofpivotcol#i!=1 or 
+    	listofpivotcol#i!=0 then rowAdd(matrix1,i,-listofpivotcol#i,rownum));
 );
-return matrix1;
+return matrix(matrix1);-- T$ change to convert matrix1 to matrix
 )
 
 
@@ -210,7 +223,8 @@ return matrix2;
 simplex=method(Options=> {Optimize=>Max})
 simplex(List) := opts-> list1  -> (   
 local newList; local tempList; local tempElement; 
-local count; local matrix1; local coordinates; local list1;
+local count; local matrix1; local coordinates; local list1; local optimizedCost;
+
 
     
     if opts.Optimize==Min then(list1 = entries(transpose(matrix(list1))););    --If we want to minimize, we must do the dual and therefore need the transpose of the coefficients we are given
@@ -231,7 +245,7 @@ local count; local matrix1; local coordinates; local list1;
        	);
     
     --The simplex procedure is done on the matrix
-    matrix1=mutableMatrix(newList);
+    matrix1=matrix(newList); -- T$ change to get rid of mutableMatrix now matrix
     matrix1=rowMult(matrix1,numRows(matrix1)-1,-1);
     matrix1=SimplexProc(matrix1);
     

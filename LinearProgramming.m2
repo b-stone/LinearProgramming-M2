@@ -80,18 +80,18 @@ SimplexProc(Matrix) :=  matrix1  -> (
     matrix1=sub(matrix1,RR);	   
     numberofRows = numRows(matrix1);
 
-    isThereANeg=true;    --Condition for the while loop, checks if there is a negative in the last row of the matrix
+--    isThereANeg=true;    --Condition for the while loop, checks if there is a negative in the last row of the matrix
+    	
+    -- initialize to smallest entry of cost function
+--    lastrow=matrix1^{numberofRows-1}; T$: this line is useless
+    lastrow=flatten(entries(matrix1^{numberofRows-1}));
+    smallest=min(lastrow);
 
-    while isThereANeg do(
-    	lastrow=matrix1^{numberofRows-1};
-    	listoflast=flatten(entries(lastrow));
-    
-         smallest=min(listoflast);
-	     -- if there are no negatives in the list, then break loop
-	     if smallest>=0 then break; 
-	
+    -- if there are no negatives in the list, then break loop
+    while smallest < 0 do(
+	     
     	-- pivcol is the column of the matrix with the smallest entry in the last row
-    	colnum=position(listoflast,i-> i == smallest);
+    	colnum=position(lastrow,i-> i == smallest);
     	pivcol=(matrix1)_(colnum);    --The column that has the most negative value in the last row
  
         -- Comparing the pivotcolumn with the last column to see which row we reduce around
@@ -99,9 +99,7 @@ SimplexProc(Matrix) :=  matrix1  -> (
     
         -- Removing the last value of the pivot column, because it is not used in comparing process
     	listofpivotcol=remove(listofpivotcol,length(listofpivotcol)-1);	   
-
-        listoflastcol=flatten(entries((matrix1)_(numColumns(matrix1)-1)));
-    
+        listoflastcol=flatten(entries((matrix1)_(numColumns(matrix1)-1)));   
         listoflastcol=remove(listoflastcol,length(listoflastcol)-1);
     
         -- Finding the ratios between the last columns entries and respective pivot column entries
@@ -120,6 +118,8 @@ SimplexProc(Matrix) :=  matrix1  -> (
         --Reduces other rows around the pivotcolumn
     	for i from 0 to #listofpivotcol-1 do (if listofpivotcol#i!=1 or 
     	    listofpivotcol#i!=0 then rowAdd(matrix1,i,-listofpivotcol#i,rownum));
+    
+    -- T$ need to find new smallest of the last row otherwise loop won't end
     );
 return matrix(matrix1);-- T$ change to convert matrix1 to matrix
 )

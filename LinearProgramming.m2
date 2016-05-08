@@ -178,9 +178,16 @@ getMaxCoordinates(Matrix):= matrix1 -> (
        	   -- There might be an error here!!!!
 	   -- what if the original matrix has a column with
 	   -- one nonzero entry?  This gives the wrong output!!!
+	   
+	   -- If there is one nonzero entry in a column,
+	   -- the corresponding variable should have the value
+	   -- in the last column of its row
            if count==1 then (
+	       
+	       -- get the row of the nonzero entry
     	       rowpos = position(listofcol,i-> i != 0);
-	       listoflastcol=flatten(entries(matrix1_(numColumns(matrix1)-1)));
+	       -- convert last column to list (defined above!!!)
+	       -- listoflastcol=flatten(entries(matrix1_(numColumns(matrix1)-1)));
     	       coordinates=append(coordinates,listoflastcol#rowpos);
 	   );
     if count!=1 then coordinates=append(coordinates,0);
@@ -407,7 +414,9 @@ rank matrix2
 restart
 loadPackage"LinearProgramming"
 M = matrix {{0,2,3,1,1,0,0,5},{0,4,1,2,0,1,0,11},{0,3,4,2,0,0,1,8},{1,-5,-4,-3,0,0,0,0}}
+Mess = matrix {{0,2,0,1,1,0,0,5},{0,4,0,2,0,1,0,11},{0,3,4,2,0,0,1,8},{1,-5,-4,-3,0,0,0,0}}
 N = simplexProc M
+Ness = simplexProc Mess
 getMaxCoordinates N
 reduceAtPivot(M,1,3)
 simplex M

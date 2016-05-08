@@ -60,14 +60,19 @@ export {
 ------------------------------------------------------------
 
 
--- Input: Mutable Matrix 
+-- Input:  Matrix 
 
--- Output: Mutable Matrix 
+-- Output: Matrix 
 
 -- Description:
 -- Given a matrix that is in the order (restraint functions coefficients|slack variables for restraints|Constants)
 --    	      	      	      	       (cost function coeeficients      |slack variable for cost       |   0     )
 -- This method applies the simplex method to that matrix
+--
+-- The simplex method selects the largest(or smallest) entry in the last row.
+-- The column with that entry is the pivot column.
+-- Then take the list of entries in last column/entry in pivot column.
+-- The row with the min ratio is the pivot row.
 
 simplexProc=method()
 simplexProc(Matrix) :=  matrix1  -> (
@@ -84,29 +89,23 @@ simplexProc(Matrix) :=  matrix1  -> (
     matrix1=sub(matrix1,RR);	   
     --numberofRows = numRows(matrix1);
     	
-    -- last row is the cost function
+    -- lastrow is the cost function
     lastrow=flatten(entries(matrix1^{numRows(matrix1)-1}));
 
-    -- Smallest entry in cost function.  
-    -- This entry is in the pivot column
+    -- Get smallest entry in cost function.  
     smallest=min(lastrow);
 
     -- if there are no negatives in the list, then we are done
     while smallest < 0 do(
--- %%%%%%%%%%%%%%%%
--- This section first finds which row we apply row reduction to
--- simplex method: pick pivot column j with smallest(largest) coeff of cost function
--- pick the row i where the ratio of last entry/pivot column entry is min
--- apply Gauss-Jordan with (i,j) entry as pivot position
-	     
+
     	-- the index of the pivot column
     	colnum=position(lastrow,i-> i == smallest);
  
-        -- the pivot column minus last entry
+        -- remove last entry of pivot column (it's from the cost function)
     	listofpivotcol=flatten(entries((matrix1)_(colnum)));
      	listofpivotcol=remove(listofpivotcol,length(listofpivotcol)-1);	   
 
-    	-- the last column minus last entry
+    	-- remove last entry of the last column
         listoflastcol=flatten(entries((matrix1)_(numColumns(matrix1)-1)));   
         listoflastcol=remove(listoflastcol,length(listoflastcol)-1);
     
@@ -116,7 +115,6 @@ simplexProc(Matrix) :=  matrix1  -> (
 
        	-- This is the row we select for our row operations
     	rownum=position(listofdividends,i->i==min(listofdividends));    
--- %%%%%%%%%%%%%%%%%%%
 
     	-- row reduce at this pivot
         matrix1=reduceAtPivot(matrix1,rownum,colnum);
@@ -134,7 +132,7 @@ return matrix1;
 --++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 -- Input:  Matrix
--- Output: List of the form {variable, value}
+-- Output: List 
 -- Description: 
 -- Given a matrix that had the simplex method applied to it
 -- for maximization, this will return the coefficients of the

@@ -496,8 +496,13 @@ rank matrix2
 restart
 loadPackage"LinearProgramming"
 M = matrix {{0,2,3,1,1,0,0,5},{0,4,1,2,0,1,0,11},{0,3,4,2,0,0,1,8},{1,-5,-4,-3,0,0,0,0}}
-
 addSlack M
+
+minSample = matrix {{3,2,2},{5,1,3},{29,10,0}}
+addSlack minSample
+
+anotherExample = matrix {{3,2,2},{5,1,3},{29,10,0},{1,2,4},{1,1,1},{4,4,4}}
+addSlack anotherExample
 entries(M)
 #entries(M)
 

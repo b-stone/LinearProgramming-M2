@@ -96,13 +96,15 @@ SimplexProc(Matrix) :=  matrix1  -> (
     	-- pivcol is the column of the matrix with the smallest entry in the last row
     	colnum=position(lastrow,i-> i == smallest);
  
-        -- Comparing the pivotcolumn with the last column to see which row we reduce around
+        -- the pivot column minus last entry
     	listofpivotcol=flatten(entries((matrix1)_(colnum)));
      	listofpivotcol=remove(listofpivotcol,length(listofpivotcol)-1);	   
+
+    	-- the last column minus last entry
         listoflastcol=flatten(entries((matrix1)_(numColumns(matrix1)-1)));   
         listoflastcol=remove(listoflastcol,length(listoflastcol)-1);
     
-        -- Finding the ratios between the last columns entries and respective pivot column entries
+        -- the ratio of entries in last column/entries in pivot column
     	listofdividends=apply(listoflastcol,listofpivotcol,(i,j)->(
 		if j==0 then infinity else i/j));	   
 

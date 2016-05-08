@@ -87,7 +87,8 @@ simplexProc(Matrix) :=  matrix1  -> (
     -- last row is the cost function
     lastrow=flatten(entries(matrix1^{numRows(matrix1)-1}));
 
-    -- smallest entry in cost function
+    -- Smallest entry in cost function.  
+    -- This entry is in the pivot column
     smallest=min(lastrow);
 
     -- if there are no negatives in the list, then we are done
@@ -117,25 +118,8 @@ simplexProc(Matrix) :=  matrix1  -> (
     	rownum=position(listofdividends,i->i==min(listofdividends));    
 -- %%%%%%%%%%%%%%%%%%%
 
--- %%%%%%%%%%%%%%%%%%
--- Make this its own method!!!
- {*
-        -- Normalize the selected row about the pivot
-    	matrix1=rowMult(mutableMatrix(matrix1),rownum,(1/(listofpivotcol#rownum)));
-    	listofpivotcol=flatten(entries((matrix matrix1)_(colnum)));
-
-        -- Reduce other rows around the pivotcolumn
-    	for i from 0 to #listofpivotcol-1 do (
-	    if listofpivotcol#i!=1 or 
-    	    listofpivotcol#i!=0 then rowAdd(matrix1,i,-listofpivotcol#i,rownum));
-	
-	-- convert back to matrix
-	matrix1=matrix(matrix1);
-*}	
--- End of what should be its own method
--- %%%%%%%%%%%%%%%%%%%
-
-matrix1=reduceAtPivot(matrix1,rownum,colnum);
+    	-- row reduce at this pivot
+        matrix1=reduceAtPivot(matrix1,rownum,colnum);
 
         -- Find the new smallest entry in the last row
         lastrow=flatten(entries(matrix1^{numRows(matrix1)-1}));
@@ -150,7 +134,7 @@ return matrix1;
 --++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 -- Input:  Matrix
--- Output: List of numbers
+-- Output: List of the form {variable, value}
 -- Description: 
 -- Given a matrix that had the simplex method applied to it
 -- for maximization, this will return the coefficients of the
@@ -164,23 +148,35 @@ getMaxCoordinates(Matrix):= matrix1 -> (
     local coordinates;
     local listoflastcol; 
 
+    -- This is the last column of the matrix
    listoflastcol=flatten(entries(matrix1_(numColumns(matrix1)-1)));
+
+    -- This list will be the coordinates of the solution
    coordinates=new BasicList;
 
    -- Figure out the number of variables not including the slacks
    numOfVars=numColumns(matrix1)-numRows(matrix1)-1;    
    
-   --If a column for the variable has more than one coefficient for it, that variable is set to 0, otherwise it is given the value in the respective row
-   for i from 1 to numOfVars do(
+   -- If a column for the variable has more than one coefficient for it, 
+   -- that variable is set to 0, otherwise it is given the value in the r
+   -- espective row
+   
+   -- The variable i corresponds to the columns with original variables 
+   for i from 0 to numOfVars do(
+       
+       -- count is the number of nonzero entries in column i
        count=0;
+       
+       -- this is column i
        listofcol=flatten(entries(matrix1_i));
+
        for j from 0 to #listoflastcol-1 do(
 	   if listofcol#j!=0 then count=count+1);
-       if count==1 then (
-    	   rowpos = position(listofcol,i-> i != 0);
-	   listoflastcol=flatten(entries(matrix1_(numColumns(matrix1)-1)));
-    	   coordinates=append(coordinates,listoflastcol#rowpos);
-	);
+           if count==1 then (
+    	       rowpos = position(listofcol,i-> i != 0);
+	       listoflastcol=flatten(entries(matrix1_(numColumns(matrix1)-1)));
+    	       coordinates=append(coordinates,listoflastcol#rowpos);
+	   );
     if count!=1 then coordinates=append(coordinates,0);
     );
 return coordinates;

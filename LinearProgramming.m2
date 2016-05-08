@@ -39,7 +39,7 @@ export {
      "Min",
     
     -- Methods
-     "SimplexProc",
+     "simplexProc",
      "getMaxCoordinates",
      "getMinCoordinates",
      "rref",
@@ -69,8 +69,8 @@ export {
 --    	      	      	      	       (cost function coeeficients      |slack variable for cost       |   0     )
 -- This method applies the simplex method to that matrix
 
-SimplexProc=method()
-SimplexProc(Matrix) :=  matrix1  -> (
+simplexProc=method()
+simplexProc(Matrix) :=  matrix1  -> (
     local lastrow;
     local listofpivotcol;
     local listoflastcol;
@@ -156,7 +156,6 @@ getMaxCoordinates(Matrix):= matrix1 -> (
     local coordinates;
     local listoflastcol; 
 
-   count=0; 
    listoflastcol=flatten(entries(matrix1_(numColumns(matrix1)-1)));
    coordinates=new BasicList;
 
@@ -164,7 +163,7 @@ getMaxCoordinates(Matrix):= matrix1 -> (
    numOfVars=numColumns(matrix1)-numRows(matrix1)-1;    
    
    --If a column for the variable has more than one coefficient for it, that variable is set to 0, otherwise it is given the value in the respective row
-   for i from 0 to numOfVars-1 do(
+   for i from 1 to numOfVars do(
        count=0;
        listofcol=flatten(entries(matrix1_i));
        for j from 0 to #listoflastcol-1 do(
@@ -275,7 +274,7 @@ local count; local matrix1; local coordinates; local list1; local optimizedCost;
     --The simplex procedure is done on the matrix
     matrix1=matrix(newList); -- T$ change to get rid of mutableMatrix now matrix
     matrix1=rowMult(matrix1,numRows(matrix1)-1,-1);
-    matrix1=SimplexProc(matrix1);
+    matrix1=simplexProc(matrix1);
     
     --Coordinates are found depending on goal of our optimiziation
     if opts.Optimize==Max then coordinates = getMaxCoordinates(matrix1);
@@ -322,8 +321,8 @@ loadPackage "LinearProgramming"
 maxSample = {{1,3,2,10},{1,5,1,8},{8,10,7,0}}
 maxSample = {{2,1,1,14},{4,2,3,28},{2,5,5,30},{1,2,-1,0}}
 
-maxSample = matrix({{1,4,5,2,1},{3,1,5,2,6},{4,2,-3,-3,-6}})
-SimplexProc(matrix maxSample)
+maxSample = matrix({{1,4,5,2,1},{3,1,5,2,6},{4,2,-3,-3,0}})
+simplexProc(maxSample)
 
 simplex(maxSample,Optimize=>Max)
 
@@ -350,7 +349,8 @@ rank matrix2
 restart
 loadPackage"LinearProgramming"
 M = matrix {{0,2,3,1,1,0,0,5},{0,4,1,2,0,1,0,11},{0,3,4,2,0,0,1,8},{1,-5,-4,-3,0,0,0,0}}
-SimplexProc M
+N = simplexProc M
+getMaxCoordinates N
 simplex M
 
 

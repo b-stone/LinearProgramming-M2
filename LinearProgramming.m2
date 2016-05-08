@@ -174,11 +174,7 @@ getMaxCoordinates(Matrix):= matrix1 -> (
        for j from 0 to #listoflastcol-1 do(
 	   -- if there's a nonzero entry increase count
 	   if listofcol#j!=0 then count=count+1);
-       
-       	   -- There might be an error here!!!!
-	   -- what if the original matrix has a column with
-	   -- one nonzero entry?  This gives the wrong output!!!
-	   
+       	   
 	   -- If there is one nonzero entry in a column,
 	   -- the corresponding variable should have the value
 	   -- in the last column of its row
@@ -186,10 +182,13 @@ getMaxCoordinates(Matrix):= matrix1 -> (
 	       
 	       -- get the row of the nonzero entry
     	       rowpos = position(listofcol,i-> i != 0);
-	       -- convert last column to list (defined above!!!)
-	       -- listoflastcol=flatten(entries(matrix1_(numColumns(matrix1)-1)));
+	       
+	       -- add the value of x_i to the list of the solution
     	       coordinates=append(coordinates,listoflastcol#rowpos);
 	   );
+    
+    -- If there is not exactly one nonzero entry in column i,
+    -- then variable x_i=0.   
     if count!=1 then coordinates=append(coordinates,0);
     );
 return coordinates;

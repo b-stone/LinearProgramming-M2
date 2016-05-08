@@ -60,9 +60,9 @@ export {
 ------------------------------------------------------------
 
 
--- Input: Mutable Matrix -- T$ change to just Matrix
+-- Input: Mutable Matrix 
 
--- Output: Mutable Matrix -- T$ change to just Marix
+-- Output: Mutable Matrix 
 
 -- Description:
 -- Given a matrix that is in the order (restraint functions coefficients|slack variables for restraints|Constants)
@@ -71,17 +71,14 @@ export {
 
 SimplexProc=method()
 SimplexProc(Matrix) :=  matrix1  -> (
-    --local numberofRows;
-    --local isThereANeg;
     local lastrow;
-    --local listoflast;
-    --local coordinates;
-    local listofpivotcol;local listoflastcol;
-    --local smallestrow;
-    local rownum;local matrix1;
+    local listofpivotcol;
+    local listoflastcol;
+    local rownum;
+    local matrix1;
     local smallest;
-    --local pivcol;
-    local listofdividends;local colnum;
+    local listofdividends;
+    local colnum;
 
     --Forces the matrix to be in the reals
     matrix1=sub(matrix1,RR);	   
@@ -101,9 +98,7 @@ SimplexProc(Matrix) :=  matrix1  -> (
  
         -- Comparing the pivotcolumn with the last column to see which row we reduce around
     	listofpivotcol=flatten(entries((matrix1)_(colnum)));
-    
-        -- Removing the last value of the pivot column, because it is not used in comparing process
-    	listofpivotcol=remove(listofpivotcol,length(listofpivotcol)-1);	   
+     	listofpivotcol=remove(listofpivotcol,length(listofpivotcol)-1);	   
         listoflastcol=flatten(entries((matrix1)_(numColumns(matrix1)-1)));   
         listoflastcol=remove(listoflastcol,length(listoflastcol)-1);
     
@@ -113,14 +108,13 @@ SimplexProc(Matrix) :=  matrix1  -> (
 
        	-- This is the row we select for our row operations
     	rownum=position(listofdividends,i->i==min(listofdividends));    
---        smallestrow=min(listofdividends);    	     	   
 -- %%%%%%%%%%%%%%%%%%%
  
-        --Reducing the row the element we are pivoting around
+        -- Normalize the row about the pivot
     	matrix1=rowMult(mutableMatrix(matrix1),rownum,(1/(listofpivotcol#rownum)));
-    	listofpivotcol=flatten(entries((matrix1)_(colnum)));
+    	listofpivotcol=flatten(entries((matrix matrix1)_(colnum)));
 
-        --Reduces other rows around the pivotcolumn
+        -- Reduce other rows around the pivotcolumn
     	for i from 0 to #listofpivotcol-1 do (
 	    if listofpivotcol#i!=1 or 
     	    listofpivotcol#i!=0 then rowAdd(matrix1,i,-listofpivotcol#i,rownum));
@@ -139,7 +133,7 @@ end
 
 --++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
--- Input: Mutable Matrix
+-- Input:  Matrix
 -- Output: List of numbers
 -- Description: 
 -- Given a matrix that had the simplex method applied to it
@@ -313,8 +307,8 @@ loadPackage "LinearProgramming"
 maxSample = {{1,3,2,10},{1,5,1,8},{8,10,7,0}}
 maxSample = {{2,1,1,14},{4,2,3,28},{2,5,5,30},{1,2,-1,0}}
 
-maxSample = matrix({{1,4,5,2,1},{3,1,5,2,6},{4,2,0-3,0-3,0-6}})
-SimplexProc(maxSample)
+maxSample = matrix({{1,4,5,2,1},{3,1,5,2,6},{4,2,-3,-3,-6}})
+SimplexProc(matrix maxSample)
 
 simplex(maxSample,Optimize=>Max)
 

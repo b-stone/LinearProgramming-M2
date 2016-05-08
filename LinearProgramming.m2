@@ -133,7 +133,7 @@ simplexProc(Matrix) :=  matrix1  -> (
 	matrix1=matrix(matrix1);
 	
 -- End of what should be its own method
--- %%%%%%%%%%%%%%%%%%%%%%%%%%%
+-- %%%%%%%%%%%%%%%%%%%
 
         -- Find the new smallest entry in the last row
         lastrow=flatten(entries(matrix1^{numRows(matrix1)-1}));
@@ -214,8 +214,11 @@ return coordinates;
 -- This method will put the given matrix
 -- into row reduced echelon form.
 rref=method()
-rref(MutableMatrix) :=  matrix2  -> (
-local count;local row;local matrix2;local changerow;    
+rref(Matrix) :=  matrix2  -> (
+    local count;
+    local row;
+    local matrix2;
+    local changerow;    
     
 count=numRows(matrix2)-1;
 for j from 0 to count do(

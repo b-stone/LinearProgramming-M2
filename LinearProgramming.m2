@@ -417,6 +417,7 @@ Mess = matrix {{0,2,0,1,1,0,0,5},{0,4,0,2,0,1,0,11},{0,3,4,2,0,0,1,8},{1,-5,-4,-
 N = simplexProc M
 Ness = simplexProc Mess
 getMaxCoordinates N
+getMaxCoordinates Ness
 reduceAtPivot(M,1,3)
 simplex M
 

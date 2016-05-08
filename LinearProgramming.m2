@@ -44,7 +44,8 @@ export {
      "getMinCoordinates",
      "rref",
      "simplexMethod",
-     "reduceAtPivot"
+     "reduceAtPivot",
+     "addSlack"
 }
 
 
@@ -292,6 +293,88 @@ for j from 0 to count do(
 return matrix2;
 )
   
+
+--++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+
+-- Input: A Matrix
+
+-- Output: A Matrix, List of Numbers (The values of the variables to optimize), and A Number (The max/min cost value)
+
+-- Description: 
+-- This applies the simplex method to a given list of lists. It will minimize or maximize, depending
+-- on what the user opts to do.
+
+-- Additional/Necessary Information:
+-- The list of list should have the order: restraints followed by cost function.
+-- A list inside the list should be: coefficient 1, coefficient 2, etc, restraint constant. 
+-- Cost functions should be set to 0.
+-- All the variables should be restrained by 0. 
+-- Restraint functions should be set to be greater than or equal to a constant for minimization.
+-- Restraint functions should be set to be less than or equal to a constant for maximization.
+
+addSlack=method()
+addSlack(Matrix) := matrix1  -> (   
+    local newList; 
+    local tempList; 
+    local tempElement; 
+    local count; 
+    local matrix1; 
+    local coordinates; 
+    local list1; 
+    local optimizedCost;
+    local matrix1;
+    
+     -- To minimize, take transpose
+    if opts.Optimize==Min then(matrix1 = transpose(matrix1););    
+ 
+ --%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+ -- this will be a new method: addSlack(matrix)   
+    newList=new List;
+    
+    -- i ranges over the rows of the matrix
+    for i from 0 to #entries(matrix1)-1 do(
+	
+ 	-- get row i of the matrix
+       	tempList=flatten(entries(matrix1^{i}));   
+	
+	-- temporarily remove the constant at the end
+       	tempElement=tempList#(#tempList-1);    
+       	tempList=remove(tempList,#tempList-1);
+       	count=#list1-1;
+	
+	--Slacks are added as an identity in between the non-slack variables and their respective constant restraints
+       	for j from 0 to count  do(
+	    if j==count and i==j then tempList=append(tempList,-1);
+	    if j==i and j!=count then tempList= append(tempList,1);
+	    if j!=i then tempList= append(tempList,0);
+	    );
+       	tempList=append(tempList,tempElement);
+       	newList=append(newList,tempList);
+       	);
+-- end of what will be new method    
+--%%%%%%%%%%%%%%%%%%    
+
+    --The simplex procedure is done on the matrix
+    matrix1=matrix(newList); 
+    matrix1=matrix(rowMult(mutableMatrix(matrix1),numRows(matrix1)-1,-1));
+    matrix1=simplexProc(matrix1);
+    
+    --Coordinates are found depending on goal of our optimiziation
+    if opts.Optimize==Max then coordinates = getMaxCoordinates(matrix1);
+    if opts.Optimize==Min then coordinates = getMinCoordinates(matrix1);
+    optimizedCost=matrix1_(numRows(matrix1)-1,numColumns(matrix1)-1);
+    return {matrix1,coordinates,optimizedCost};
+ )
+
+
+
+
+
+
+
+
+
 --++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 
@@ -325,15 +408,18 @@ simplexMethod(Matrix) := opts-> matrix1  -> (
     
      -- To minimize, take transpose
     if opts.Optimize==Min then(matrix1 = transpose(matrix1););    
-    
+ 
+ --%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+ -- this will be a new method: addSlack(matrix)   
     newList=new List;
     
     -- i ranges over the rows of the matrix
-    for i from 0 to #list1-1 do(
- 	--Gets the list we wish to add extra slack variables
+    for i from 0 to #entries(matrix1)-1 do(
+	
+ 	-- get row i of the matrix
        	tempList=flatten(entries(matrix1^{i}));   
 	
-	--The constant for the cost function is placed after the slacks
+	-- temporarily remove the constant at the end
        	tempElement=tempList#(#tempList-1);    
        	tempList=remove(tempList,#tempList-1);
        	count=#list1-1;
@@ -347,7 +433,9 @@ simplexMethod(Matrix) := opts-> matrix1  -> (
        	tempList=append(tempList,tempElement);
        	newList=append(newList,tempList);
        	);
-    
+-- end of what will be new method    
+--%%%%%%%%%%%%%%%%%%    
+
     --The simplex procedure is done on the matrix
     matrix1=matrix(newList); 
     matrix1=matrix(rowMult(mutableMatrix(matrix1),numRows(matrix1)-1,-1));
@@ -428,6 +516,8 @@ loadPackage"LinearProgramming"
 M = matrix {{0,2,3,1,1,0,0,5},{0,4,1,2,0,1,0,11},{0,3,4,2,0,0,1,8},{1,-5,-4,-3,0,0,0,0}}
 
 entries(M)
+#entries(M)
+
 flatten entries M^{1}
 
 Mess = matrix {{0,2,0,1,1,0,0,5},{0,4,0,2,0,1,0,11},{0,3,4,2,0,0,1,8},{1,-5,-4,-3,0,0,0,0}}

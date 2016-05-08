@@ -70,12 +70,12 @@ export {
 -- This method applies the simplex method to that matrix
 
 SimplexProc=method()
--- T$ change to get rid of MutableMatrix so user enters Matrix
 SimplexProc(Matrix) :=  matrix1  -> (
     --local numberofRows;
-    local isThereANeg;local lastrow;
+    --local isThereANeg;
+    local lastrow;
     --local listoflast;
-    local coordinates;
+    --local coordinates;
     local listofpivotcol;local listoflastcol;
     --local smallestrow;
     local rownum;local matrix1;
@@ -85,7 +85,7 @@ SimplexProc(Matrix) :=  matrix1  -> (
 
     --Forces the matrix to be in the reals
     matrix1=sub(matrix1,RR);	   
-    numberofRows = numRows(matrix1);
+    --numberofRows = numRows(matrix1);
     	
     -- initialize to smallest entry of cost function
     lastrow=flatten(entries(matrix1^{numRows(matrix1)-1}));
@@ -109,7 +109,7 @@ SimplexProc(Matrix) :=  matrix1  -> (
     
         -- Finding the ratios between the last columns entries and respective pivot column entries
     	listofdividends=apply(listoflastcol,listofpivotcol,(i,j)->(
-		if j==0 then infinity else i/j);	   
+		if j==0 then infinity else i/j));	   
 
        	-- This is the row we select for our row operations
     	rownum=position(listofdividends,i->i==min(listofdividends));    
@@ -127,13 +127,14 @@ SimplexProc(Matrix) :=  matrix1  -> (
 	
 	matrix1=matrix(matrix1);
 	
-    -- T$ need to find new smallest of the last row otherwise loop won't end
+        -- Find the new smallest entry in the last row
         lastrow=flatten(entries(matrix1^{numRows(matrix1)-1}));
     	smallest=min(lastrow);
-
     );
-return matrix(matrix1);-- T$ change to convert matrix1 to matrix
+return matrix1;
 )
+
+end
 
 
 --++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++

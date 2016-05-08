@@ -317,18 +317,17 @@ addSlack(Matrix) := matrix1  -> (
     local newList; 
     local tempList; 
     local tempElement; 
-    local count; 
+    local indexLastRow; 
     local matrix1; 
-    local coordinates; 
     local list1; 
-    local optimizedCost;
     local matrix1;
      
-
     newList=new List;
-    
+
+    indexLastRow=#entries(matrix1)-1;
+	    
     -- i ranges over the rows of the matrix
-    for i from 0 to #entries(matrix1)-1 do(
+    for i from 0 to indexLastRow do(
 	
  	-- get row i of the matrix
        	tempList=flatten(entries(matrix1^{i}));   
@@ -336,28 +335,19 @@ addSlack(Matrix) := matrix1  -> (
 	-- temporarily remove the constant at the end
        	tempElement=tempList#(#tempList-1);    
        	tempList=remove(tempList,#tempList-1);
-       	count=#list1-1;
 	
 	--Slacks are added as an identity in between the non-slack variables and their respective constant restraints
-       	for j from 0 to count  do(
-	    if j==count and i==j then tempList=append(tempList,-1);
-	    if j==i and j!=count then tempList= append(tempList,1);
+       	for j from 0 to indexLastRow  do(
+	    if j==indexLastRow and i==j then tempList=append(tempList,-1);
+	    if j==i and j!=indexLastRow then tempList= append(tempList,1);
 	    if j!=i then tempList= append(tempList,0);
 	    );
        	tempList=append(tempList,tempElement);
        	newList=append(newList,tempList);
        	);
--- end of what will be new method    
---%%%%%%%%%%%%%%%%%%    
 
-    --The simplex procedure is done on the matrix
-    matrix1=matrix(newList); 
-    matrix1=matrix(rowMult(mutableMatrix(matrix1),numRows(matrix1)-1,-1));
-    matrix1=simplexProc(matrix1);
-    
-
-    return matrix1;
- )
+return matrix newList;
+)
 
 
 
@@ -507,6 +497,7 @@ restart
 loadPackage"LinearProgramming"
 M = matrix {{0,2,3,1,1,0,0,5},{0,4,1,2,0,1,0,11},{0,3,4,2,0,0,1,8},{1,-5,-4,-3,0,0,0,0}}
 
+addSlack M
 entries(M)
 #entries(M)
 

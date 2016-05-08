@@ -170,8 +170,14 @@ getMaxCoordinates(Matrix):= matrix1 -> (
        -- this is column i
        listofcol=flatten(entries(matrix1_i));
 
+    	-- The variable j is the index of the row
        for j from 0 to #listoflastcol-1 do(
+	   -- if there's a nonzero entry increase count
 	   if listofcol#j!=0 then count=count+1);
+       
+       	   -- There might be an error here!!!!
+	   -- what if the original matrix has a column with
+	   -- one nonzero entry?  This gives the wrong output!!!
            if count==1 then (
     	       rowpos = position(listofcol,i-> i != 0);
 	       listoflastcol=flatten(entries(matrix1_(numColumns(matrix1)-1)));

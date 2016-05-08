@@ -93,7 +93,7 @@ SimplexProc(Matrix) :=  matrix1  -> (
 -- %%%%%%%%%%%%%%%%
 -- This section first finds which row we apply row reduction to
 	     
-    	-- pivcol is the column of the matrix with the smallest entry in the last row
+    	-- the index of the pivot column
     	colnum=position(lastrow,i-> i == smallest);
  
         -- the pivot column minus last entry
@@ -112,7 +112,7 @@ SimplexProc(Matrix) :=  matrix1  -> (
     	rownum=position(listofdividends,i->i==min(listofdividends));    
 -- %%%%%%%%%%%%%%%%%%%
  
-        -- Normalize the row about the pivot
+        -- Normalize the selected row about the pivot
     	matrix1=rowMult(mutableMatrix(matrix1),rownum,(1/(listofpivotcol#rownum)));
     	listofpivotcol=flatten(entries((matrix matrix1)_(colnum)));
 
@@ -121,6 +121,7 @@ SimplexProc(Matrix) :=  matrix1  -> (
 	    if listofpivotcol#i!=1 or 
     	    listofpivotcol#i!=0 then rowAdd(matrix1,i,-listofpivotcol#i,rownum));
 	
+	-- convert back to matrix
 	matrix1=matrix(matrix1);
 	
         -- Find the new smallest entry in the last row

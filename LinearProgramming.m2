@@ -128,7 +128,7 @@ SimplexProc(Matrix) :=  matrix1  -> (
 return matrix1;
 )
 
-end
+
 
 
 --++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -140,24 +140,31 @@ end
 -- for maximization, this will return the coefficients of the
 -- cost function, in order to maxmize the cost value.
 getMaxCoordinates=method()
-getMaxCoordinates(MutableMatrix):= matrix1 -> (
-local count; local numOfVars;local listofcol;local rowpos;local coordinates;
-local listoflastcol; local count;
+getMaxCoordinates(Matrix):= matrix1 -> (
+    local count; 
+    local numOfVars;
+    local listofcol;
+    local rowpos;
+    local coordinates;
+    local listoflastcol; 
 
+   count=0; 
+   listoflastcol=flatten(entries(matrix1_(numColumns(matrix1)-1)));
+   coordinates=new BasicList;
 
-count=0; 
-listoflastcol=flatten(entries((matrix(matrix1))_(numColumns(matrix1)-1)));
-coordinates=new BasicList;
-numOfVars=numColumns(matrix1)-numRows(matrix1)-1;    --Figures out the number of variables not including the slacks
---If a column for the variable has more than one coefficient for it, that variable is set to 0, otherwise it is given the value in the respective row
-for i from 0 to numOfVars-1 do(
-    count=0;
-    listofcol=flatten(entries((matrix(matrix1))_i));
-    for j from 0 to #listoflastcol-1 do(if listofcol#j!=0 then count=count+1);
-    if count==1 then (
-    	rowpos = position(listofcol,i-> i != 0);
-	listoflastcol=flatten(entries((matrix(matrix1))_(numColumns(matrix1)-1)));
-    	coordinates=append(coordinates,listoflastcol#rowpos);
+   -- Figure out the number of variables not including the slacks
+   numOfVars=numColumns(matrix1)-numRows(matrix1)-1;    
+   
+   --If a column for the variable has more than one coefficient for it, that variable is set to 0, otherwise it is given the value in the respective row
+   for i from 0 to numOfVars-1 do(
+       count=0;
+       listofcol=flatten(entries(matrix1_i));
+       for j from 0 to #listoflastcol-1 do(
+	   if listofcol#j!=0 then count=count+1);
+       if count==1 then (
+    	   rowpos = position(listofcol,i-> i != 0);
+	   listoflastcol=flatten(entries(matrix1_(numColumns(matrix1)-1)));
+    	   coordinates=append(coordinates,listoflastcol#rowpos);
 	);
     if count!=1 then coordinates=append(coordinates,0);
     );

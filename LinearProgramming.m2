@@ -161,7 +161,7 @@ getMaxCoordinates(Matrix):= matrix1 -> (
    -- espective row
    
    -- The variable i corresponds to the columns with original variables 
-   for i from 0 to numOfVars do(
+   for i from 0 to numOfVars-1 do(
        
        -- count is the number of nonzero entries in column i
        count=0;
@@ -336,9 +336,13 @@ addSlack(Matrix) := matrix1  -> (
        	tempElement=tempList#(#tempList-1);    
        	tempList=remove(tempList,#tempList-1);
 	
-	--Slacks are added as an identity in between the non-slack variables and their respective constant restraints
+	-- j ranges over the number of rows
        	for j from 0 to indexLastRow  do(
+	    
+	    -- cost function gets -1 added
 	    if j==indexLastRow and i==j then tempList=append(tempList,-1);
+	    
+	    -- row i gets 1 added i steps to right, otherwise 0 added
 	    if j==i and j!=indexLastRow then tempList= append(tempList,1);
 	    if j!=i then tempList= append(tempList,0);
 	    );
@@ -348,12 +352,6 @@ addSlack(Matrix) := matrix1  -> (
 
 return matrix newList;
 )
-
-
-
-
-
-
 
 
 
@@ -390,7 +388,8 @@ simplexMethod(Matrix) := opts-> matrix1  -> (
     
      -- To minimize, take transpose
     if opts.Optimize==Min then(matrix1 = transpose(matrix1););    
- 
+
+{* 
  --%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
  -- this will be a new method: addSlack(matrix)   
     newList=new List;
@@ -415,11 +414,15 @@ simplexMethod(Matrix) := opts-> matrix1  -> (
        	tempList=append(tempList,tempElement);
        	newList=append(newList,tempList);
        	);
--- end of what will be new method    
---%%%%%%%%%%%%%%%%%%    
 
     --The simplex procedure is done on the matrix
     matrix1=matrix(newList); 
+
+-- end of what will be new method    
+--%%%%%%%%%%%%%%%%%%    
+
+*}    
+    matrix1=addSlack(matrix1);
     matrix1=matrix(rowMult(mutableMatrix(matrix1),numRows(matrix1)-1,-1));
     matrix1=simplexProc(matrix1);
     
@@ -497,9 +500,17 @@ restart
 loadPackage"LinearProgramming"
 M = matrix {{0,2,3,1,1,0,0,5},{0,4,1,2,0,1,0,11},{0,3,4,2,0,0,1,8},{1,-5,-4,-3,0,0,0,0}}
 addSlack M
+simplexMethod M
+
+MyTest = matrix {{2,3,1,5},{4,1,2,11},{3,4,2,8},{5,4,3,0}}
+addSlack MyTest
+simplexMethod MyTest
 
 minSample = matrix {{3,2,2},{5,1,3},{29,10,0}}
 addSlack minSample
+
+minSample
+simplexMethod minSample
 
 anotherExample = matrix {{3,2,2},{5,1,3},{29,10,0},{1,2,4},{1,1,1},{4,4,4}}
 addSlack anotherExample

@@ -322,10 +322,12 @@ simplex(List) := opts-> list1  -> (
     local list1; 
     local optimizedCost;
 
-     --If we want to minimize, we must do the dual and therefore need the transpose of the coefficients we are given
+     -- To minimize, take transpose
     if opts.Optimize==Min then(list1 = entries(transpose(matrix(list1))););    
     
     newList=new List;
+    
+    -- i ranges over the rows of the matrix
     for i from 0 to #list1-1 do(
  	--Gets the list we wish to add extra slack variables
        	tempList=list1#i;   
@@ -334,6 +336,7 @@ simplex(List) := opts-> list1  -> (
        	tempElement=tempList#(#tempList-1);    
        	tempList=remove(tempList,#tempList-1);
        	count=#list1-1;
+	
 	--Slacks are added as an identity in between the non-slack variables and their respective constant restraints
        	for j from 0 to count  do(
 	    if j==count and i==j then tempList=append(tempList,-1);
@@ -345,15 +348,15 @@ simplex(List) := opts-> list1  -> (
        	);
     
     --The simplex procedure is done on the matrix
-    matrix1=mutableMatrix(newList); 
-    matrix1=rowMult(matrix1,numRows(matrix1)-1,-1);
-    matrix1=simplexProc(matrix(matrix1));
+    matrix1=matrix(newList); 
+    matrix1=matrix(rowMult(mutableMatrix(matrix1),numRows(matrix1)-1,-1));
+    matrix1=simplexProc(matrix1);
     
     --Coordinates are found depending on goal of our optimiziation
     if opts.Optimize==Max then coordinates = getMaxCoordinates(matrix1);
     if opts.Optimize==Min then coordinates = getMinCoordinates(matrix1);
     optimizedCost=matrix1_(numRows(matrix1)-1,numColumns(matrix1)-1);
-    return {matrix(matrix1),coordinates,optimizedCost};
+    return {matrix1,coordinates,optimizedCost};
  )
 
 

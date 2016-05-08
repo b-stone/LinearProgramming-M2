@@ -195,12 +195,14 @@ return coordinates;
 --++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 
--- Input: Mutable Matrix
+-- Input: Matrix
 -- Output: List of numbers
 -- Description: 
 -- Given a matrix that had the simplex method applied to it
 -- for minimizationn, this will return the coefficients of the
 -- cost function, in order to minimize the cost value.
+--
+-- There's no way this works.  it looks like it's for a specific example
 getMinCoordinates=method()
 getMinCoordinates(MutableMatrix):= matrix1 ->(
 local coordinates; local numOfVars; local lastrow; local loopstop;
@@ -222,6 +224,7 @@ return coordinates;
 -- Description: 
 -- This method applies Gauss-Jordan focused on the pivot at
 -- location (rowi,colj)
+
 reduceAtPivot=method()
 reduceAtPivot(Matrix,ZZ,ZZ) :=  (matrix1,rowi,colj)  -> (
     local matrix1;
@@ -248,7 +251,6 @@ reduceAtPivot(Matrix,ZZ,ZZ) :=  (matrix1,rowi,colj)  -> (
 	
 	-- convert back to matrix
 	matrix1=matrix(matrix1);
-
 
 return matrix1;
 )
@@ -311,16 +313,25 @@ return matrix2;
 
 simplex=method(Options=> {Optimize=>Max})
 simplex(List) := opts-> list1  -> (   
-local newList; local tempList; local tempElement; 
-local count; local matrix1; local coordinates; local list1; local optimizedCost;
+    local newList; 
+    local tempList; 
+    local tempElement; 
+    local count; 
+    local matrix1; 
+    local coordinates; 
+    local list1; 
+    local optimizedCost;
 
-
+     --If we want to minimize, we must do the dual and therefore need the transpose of the coefficients we are given
+    if opts.Optimize==Min then(list1 = entries(transpose(matrix(list1))););    
     
-    if opts.Optimize==Min then(list1 = entries(transpose(matrix(list1))););    --If we want to minimize, we must do the dual and therefore need the transpose of the coefficients we are given
     newList=new List;
     for i from 0 to #list1-1 do(
-       	tempList=list1#i;    --Gets the list we wish to add extra slack variables
-       	tempElement=tempList#(#tempList-1);    --The constant for the cost function is placed after the slacks
+ 	--Gets the list we wish to add extra slack variables
+       	tempList=list1#i;   
+	
+	--The constant for the cost function is placed after the slacks
+       	tempElement=tempList#(#tempList-1);    
        	tempList=remove(tempList,#tempList-1);
        	count=#list1-1;
 	--Slacks are added as an identity in between the non-slack variables and their respective constant restraints
@@ -334,9 +345,9 @@ local count; local matrix1; local coordinates; local list1; local optimizedCost;
        	);
     
     --The simplex procedure is done on the matrix
-    matrix1=matrix(newList); -- T$ change to get rid of mutableMatrix now matrix
+    matrix1=mutableMatrix(newList); 
     matrix1=rowMult(matrix1,numRows(matrix1)-1,-1);
-    matrix1=simplexProc(matrix1);
+    matrix1=simplexProc(matrix(matrix1));
     
     --Coordinates are found depending on goal of our optimiziation
     if opts.Optimize==Max then coordinates = getMaxCoordinates(matrix1);
@@ -418,7 +429,7 @@ getMaxCoordinates N
 getMaxCoordinates Ness
 reduceAtPivot(M,1,3)
 simplex M
-
-
-
+flatten M
+entries M
+simplex entries M
 -- tom

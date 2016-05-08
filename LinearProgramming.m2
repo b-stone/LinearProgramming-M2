@@ -37,14 +37,16 @@ export {
      "Optimize",
      "Max",
      "Min",
+     "Slack",
     
     -- Methods
      "simplexProc",
      "getMaxCoordinates",
      "getMinCoordinates",
      "rref",
-     "simplex",
-     "reduceAtPivot"
+     "simplexMethod",
+     "reduceAtPivot",
+     "addSlack"
 }
 
 
@@ -60,14 +62,19 @@ export {
 ------------------------------------------------------------
 
 
--- Input: Mutable Matrix 
+-- Input:  Matrix 
 
--- Output: Mutable Matrix 
+-- Output: Matrix 
 
 -- Description:
 -- Given a matrix that is in the order (restraint functions coefficients|slack variables for restraints|Constants)
 --    	      	      	      	       (cost function coeeficients      |slack variable for cost       |   0     )
 -- This method applies the simplex method to that matrix
+--
+-- The simplex method selects the largest(or smallest) entry in the last row.
+-- The column with that entry is the pivot column.
+-- Then take the list of entries in last column/entry in pivot column.
+-- The row with the min ratio is the pivot row.
 
 simplexProc=method()
 simplexProc(Matrix) :=  matrix1  -> (
@@ -76,7 +83,7 @@ simplexProc(Matrix) :=  matrix1  -> (
     local listoflastcol;
     local rownum;
     local matrix1;
-    local smallest;
+    local biggest;
     local listofdividends;
     local colnum;
 
@@ -84,28 +91,23 @@ simplexProc(Matrix) :=  matrix1  -> (
     matrix1=sub(matrix1,RR);	   
     --numberofRows = numRows(matrix1);
     	
-    -- last row is the cost function
+    -- lastrow is the cost function
     lastrow=flatten(entries(matrix1^{numRows(matrix1)-1}));
 
-    -- smallest entry in cost function
-    smallest=min(lastrow);
+    -- Get biggest entry in cost function.  
+    biggest=max(lastrow);
 
     -- if there are no negatives in the list, then we are done
-    while smallest < 0 do(
--- %%%%%%%%%%%%%%%%
--- This section first finds which row we apply row reduction to
--- simplex method: pick pivot column j with smallest(largest) coeff of cost function
--- pick the row i where the ratio of last entry/pivot column entry is min
--- apply Gauss-Jordan with (i,j) entry as pivot position
-	     
+    while biggest > 0 do(
+
     	-- the index of the pivot column
-    	colnum=position(lastrow,i-> i == smallest);
+    	colnum=position(lastrow,i-> i == biggest);
  
-        -- the pivot column minus last entry
+        -- remove last entry of pivot column (it's from the cost function)
     	listofpivotcol=flatten(entries((matrix1)_(colnum)));
      	listofpivotcol=remove(listofpivotcol,length(listofpivotcol)-1);	   
 
-    	-- the last column minus last entry
+    	-- remove last entry of the last column
         listoflastcol=flatten(entries((matrix1)_(numColumns(matrix1)-1)));   
         listoflastcol=remove(listoflastcol,length(listoflastcol)-1);
     
@@ -115,31 +117,13 @@ simplexProc(Matrix) :=  matrix1  -> (
 
        	-- This is the row we select for our row operations
     	rownum=position(listofdividends,i->i==min(listofdividends));    
--- %%%%%%%%%%%%%%%%%%%
 
--- %%%%%%%%%%%%%%%%%%
--- Make this its own method!!!
- {*
-        -- Normalize the selected row about the pivot
-    	matrix1=rowMult(mutableMatrix(matrix1),rownum,(1/(listofpivotcol#rownum)));
-    	listofpivotcol=flatten(entries((matrix matrix1)_(colnum)));
+    	-- row reduce at this pivot
+        matrix1=reduceAtPivot(matrix1,rownum,colnum);
 
-        -- Reduce other rows around the pivotcolumn
-    	for i from 0 to #listofpivotcol-1 do (
-	    if listofpivotcol#i!=1 or 
-    	    listofpivotcol#i!=0 then rowAdd(matrix1,i,-listofpivotcol#i,rownum));
-	
-	-- convert back to matrix
-	matrix1=matrix(matrix1);
-*}	
--- End of what should be its own method
--- %%%%%%%%%%%%%%%%%%%
-
-matrix1=reduceAtPivot(matrix1,rownum,colnum);
-
-        -- Find the new smallest entry in the last row
+        -- Find the new biggest entry in the last row
         lastrow=flatten(entries(matrix1^{numRows(matrix1)-1}));
-    	smallest=min(lastrow);
+    	biggest=max(lastrow);
     );
 return matrix1;
 )
@@ -150,7 +134,7 @@ return matrix1;
 --++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 -- Input:  Matrix
--- Output: List of numbers
+-- Output: List 
 -- Description: 
 -- Given a matrix that had the simplex method applied to it
 -- for maximization, this will return the coefficients of the
@@ -164,23 +148,47 @@ getMaxCoordinates(Matrix):= matrix1 -> (
     local coordinates;
     local listoflastcol; 
 
+    -- This is the last column of the matrix
    listoflastcol=flatten(entries(matrix1_(numColumns(matrix1)-1)));
+
+    -- This list will be the coordinates of the solution
    coordinates=new BasicList;
 
    -- Figure out the number of variables not including the slacks
    numOfVars=numColumns(matrix1)-numRows(matrix1)-1;    
    
-   --If a column for the variable has more than one coefficient for it, that variable is set to 0, otherwise it is given the value in the respective row
-   for i from 1 to numOfVars do(
+   -- If a column for the variable has more than one coefficient for it, 
+   -- that variable is set to 0, otherwise it is given the value in the r
+   -- espective row
+   
+   -- The variable i corresponds to the columns with original variables 
+   for i from 0 to numOfVars-1 do(
+       
+       -- count is the number of nonzero entries in column i
        count=0;
+       
+       -- this is column i
        listofcol=flatten(entries(matrix1_i));
+
+    	-- The variable j is the index of the row
        for j from 0 to #listoflastcol-1 do(
+	   -- if there's a nonzero entry increase count
 	   if listofcol#j!=0 then count=count+1);
-       if count==1 then (
-    	   rowpos = position(listofcol,i-> i != 0);
-	   listoflastcol=flatten(entries(matrix1_(numColumns(matrix1)-1)));
-    	   coordinates=append(coordinates,listoflastcol#rowpos);
-	);
+       	   
+	   -- If there is one nonzero entry in a column,
+	   -- the corresponding variable should have the value
+	   -- in the last column of its row
+           if count==1 then (
+	       
+	       -- get the row of the nonzero entry
+    	       rowpos = position(listofcol,i-> i != 0);
+	       
+	       -- add the value of x_i to the list of the solution
+    	       coordinates=append(coordinates,listoflastcol#rowpos);
+	   );
+    
+    -- If there is not exactly one nonzero entry in column i,
+    -- then variable x_i=0.   
     if count!=1 then coordinates=append(coordinates,0);
     );
 return coordinates;
@@ -189,12 +197,14 @@ return coordinates;
 --++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 
--- Input: Mutable Matrix
+-- Input: Matrix
 -- Output: List of numbers
 -- Description: 
 -- Given a matrix that had the simplex method applied to it
 -- for minimizationn, this will return the coefficients of the
 -- cost function, in order to minimize the cost value.
+--
+-- There's no way this works.  it looks like it's for a specific example
 getMinCoordinates=method()
 getMinCoordinates(MutableMatrix):= matrix1 ->(
 local coordinates; local numOfVars; local lastrow; local loopstop;
@@ -216,6 +226,7 @@ return coordinates;
 -- Description: 
 -- This method applies Gauss-Jordan focused on the pivot at
 -- location (rowi,colj)
+
 reduceAtPivot=method()
 reduceAtPivot(Matrix,ZZ,ZZ) :=  (matrix1,rowi,colj)  -> (
     local matrix1;
@@ -242,7 +253,6 @@ reduceAtPivot(Matrix,ZZ,ZZ) :=  (matrix1,rowi,colj)  -> (
 	
 	-- convert back to matrix
 	matrix1=matrix(matrix1);
-
 
 return matrix1;
 )
@@ -284,10 +294,72 @@ for j from 0 to count do(
 return matrix2;
 )
   
+
 --++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 
--- Input: A List of Lists and Option
+-- Input: A Matrix
+
+-- Output: A Matrix
+
+-- Description: 
+-- This adds slack variables to the matrix
+
+-- Additional/Necessary Information:
+-- The matrix should have the order: restraints followed by cost function.
+-- A list inside the list should be: coefficient 1, coefficient 2, etc, restraint constant. 
+-- Cost functions should be set to 0.
+-- All the variables should be restrained by 0. 
+-- Restraint functions should be set to be greater than or equal to a constant for minimization.
+-- Restraint functions should be set to be less than or equal to a constant for maximization.
+
+addSlack=method()
+addSlack(Matrix) := matrix1  -> (   
+    local newList; 
+    local tempList; 
+    local tempElement; 
+    local indexLastRow; 
+    local matrix1; 
+    local list1; 
+    local matrix1;
+     
+    newList=new List;
+
+    indexLastRow=#entries(matrix1)-1;
+	    
+    -- i ranges over the rows of the matrix
+    for i from 0 to indexLastRow do(
+	
+ 	-- get row i of the matrix
+       	tempList=flatten(entries(matrix1^{i}));   
+	
+	-- temporarily remove the constant at the end
+       	tempElement=tempList#(#tempList-1);    
+       	tempList=remove(tempList,#tempList-1);
+	
+	-- j ranges over the number of rows
+       	for j from 0 to indexLastRow  do(
+	    
+	    -- cost function gets -1 added
+	    if j==indexLastRow and i==j then tempList=append(tempList,-1);
+	    
+	    -- row i gets 1 added i steps to right, otherwise 0 added
+	    if j==i and j!=indexLastRow then tempList= append(tempList,1);
+	    if j!=i then tempList= append(tempList,0);
+	    );
+       	tempList=append(tempList,tempElement);
+       	newList=append(newList,tempList);
+       	);
+
+return matrix newList;
+)
+
+
+
+--++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+
+-- Input: A Matrix
 
 -- Output: A Matrix, List of Numbers (The values of the variables to optimize), and A Number (The max/min cost value)
 
@@ -303,40 +375,30 @@ return matrix2;
 -- Restraint functions should be set to be greater than or equal to a constant for minimization.
 -- Restraint functions should be set to be less than or equal to a constant for maximization.
 
-simplex=method(Options=> {Optimize=>Max})
-simplex(List) := opts-> list1  -> (   
-local newList; local tempList; local tempElement; 
-local count; local matrix1; local coordinates; local list1; local optimizedCost;
-
-
+simplexMethod=method(Options=> {Optimize=>Max,Slack=>false})
+simplexMethod(Matrix) := opts-> matrix1  -> (   
+    local newList; 
+    local tempList; 
+    local tempElement; 
+    local count; 
+    local matrix1; 
+    local coordinates; 
+    local list1; 
+    local optimizedCost;
+    local matrix1;
     
-    if opts.Optimize==Min then(list1 = entries(transpose(matrix(list1))););    --If we want to minimize, we must do the dual and therefore need the transpose of the coefficients we are given
-    newList=new List;
-    for i from 0 to #list1-1 do(
-       	tempList=list1#i;    --Gets the list we wish to add extra slack variables
-       	tempElement=tempList#(#tempList-1);    --The constant for the cost function is placed after the slacks
-       	tempList=remove(tempList,#tempList-1);
-       	count=#list1-1;
-	--Slacks are added as an identity in between the non-slack variables and their respective constant restraints
-       	for j from 0 to count  do(
-	    if j==count and i==j then tempList=append(tempList,-1);
-	    if j==i and j!=count then tempList= append(tempList,1);
-	    if j!=i then tempList= append(tempList,0);
-	    );
-       	tempList=append(tempList,tempElement);
-       	newList=append(newList,tempList);
-       	);
+     -- To minimize, take transpose
+    if opts.Optimize==Min then(matrix1 = transpose(matrix1););
+    if opts.Slack==false then matrix1=addSlack(matrix1);    
     
-    --The simplex procedure is done on the matrix
-    matrix1=matrix(newList); -- T$ change to get rid of mutableMatrix now matrix
-    matrix1=rowMult(matrix1,numRows(matrix1)-1,-1);
+    --matrix1=matrix(rowMult(mutableMatrix(matrix1),numRows(matrix1)-1,-1));
     matrix1=simplexProc(matrix1);
     
     --Coordinates are found depending on goal of our optimiziation
     if opts.Optimize==Max then coordinates = getMaxCoordinates(matrix1);
     if opts.Optimize==Min then coordinates = getMinCoordinates(matrix1);
     optimizedCost=matrix1_(numRows(matrix1)-1,numColumns(matrix1)-1);
-    return {matrix(matrix1),coordinates,optimizedCost};
+    return {matrix1,coordinates,optimizedCost};
  )
 
 
@@ -380,14 +442,14 @@ maxSample = {{2,1,1,14},{4,2,3,28},{2,5,5,30},{1,2,-1,0}}
 maxSample = matrix({{1,4,5,2,1},{3,1,5,2,6},{4,2,-3,-3,0}})
 simplexProc(maxSample)
 
-simplex(maxSample,Optimize=>Max)
+simplexMethod(maxSample,Optimize=>Max)
 
 
 --Sample minimization problem
 minSample = {{3,2,2},{5,1,3},{29,10,0}}
 minSample = {{60,60,300},{12,6,36},{10,30,90},{.12,.15,0}}
 
-simplex(minSample,Optimize=>Min)
+simplexMethod(minSample,Optimize=>Min)
 
 
 --Sample rref problems
@@ -404,12 +466,37 @@ rank matrix2
 
 restart
 loadPackage"LinearProgramming"
-M = matrix {{0,2,3,1,1,0,0,5},{0,4,1,2,0,1,0,11},{0,3,4,2,0,0,1,8},{1,-5,-4,-3,0,0,0,0}}
+M = matrix {{2,3,1,1,0,0,0,5},{4,1,2,0,1,0,0,11},{3,4,2,0,0,1,0,8},{5,4,3,0,0,0,-1,0}}
+addSlack M
+simplexMethod (M,Slack=>true)
+
+MyTest = matrix {{2,3,1,5},{4,1,2,11},{3,4,2,8},{5,4,3,0}}
+addSlack MyTest
+simplexMethod MyTest
+
+minSample = matrix {{3,2,2},{5,1,3},{29,10,0}}
+addSlack minSample
+
+minSample
+simplexMethod minSample
+
+anotherExample = matrix {{3,2,2},{5,1,3},{29,10,0},{1,2,4},{1,1,1},{4,4,4}}
+addSlack anotherExample
+entries(M)
+#entries(M)
+
+flatten entries M^{1}
+
+Mess = matrix {{0,2,0,1,1,0,0,5},{0,4,0,2,0,1,0,11},{0,3,4,2,0,0,1,8},{1,-5,-4,-3,0,0,0,0}}
 N = simplexProc M
+Ness = simplexProc Mess
 getMaxCoordinates N
+getMaxCoordinates Ness
 reduceAtPivot(M,1,3)
-simplex M
+simplexMethod M
 
-
-
+flatten M
+entries M
+transpose M
+simplexMethod entries M
 -- tom

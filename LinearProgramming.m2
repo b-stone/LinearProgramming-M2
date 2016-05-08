@@ -39,12 +39,12 @@ export {
      "Min",
     
     -- Methods
-     "SimplexProc",
+     "simplexProc",
      "getMaxCoordinates",
      "getMinCoordinates",
      "rref",
-     "simplex"
-
+     "simplex",
+     "reduceAtPivot"
 }
 
 
@@ -69,8 +69,8 @@ export {
 --    	      	      	      	       (cost function coeeficients      |slack variable for cost       |   0     )
 -- This method applies the simplex method to that matrix
 
-SimplexProc=method()
-SimplexProc(Matrix) :=  matrix1  -> (
+simplexProc=method()
+simplexProc(Matrix) :=  matrix1  -> (
     local lastrow;
     local listofpivotcol;
     local listoflastcol;
@@ -84,33 +84,43 @@ SimplexProc(Matrix) :=  matrix1  -> (
     matrix1=sub(matrix1,RR);	   
     --numberofRows = numRows(matrix1);
     	
-    -- initialize to smallest entry of cost function
+    -- last row is the cost function
     lastrow=flatten(entries(matrix1^{numRows(matrix1)-1}));
+
+    -- smallest entry in cost function
     smallest=min(lastrow);
 
     -- if there are no negatives in the list, then we are done
     while smallest < 0 do(
 -- %%%%%%%%%%%%%%%%
 -- This section first finds which row we apply row reduction to
+-- simplex method: pick pivot column j with smallest(largest) coeff of cost function
+-- pick the row i where the ratio of last entry/pivot column entry is min
+-- apply Gauss-Jordan with (i,j) entry as pivot position
 	     
-    	-- pivcol is the column of the matrix with the smallest entry in the last row
+    	-- the index of the pivot column
     	colnum=position(lastrow,i-> i == smallest);
  
-        -- Comparing the pivotcolumn with the last column to see which row we reduce around
+        -- the pivot column minus last entry
     	listofpivotcol=flatten(entries((matrix1)_(colnum)));
      	listofpivotcol=remove(listofpivotcol,length(listofpivotcol)-1);	   
+
+    	-- the last column minus last entry
         listoflastcol=flatten(entries((matrix1)_(numColumns(matrix1)-1)));   
         listoflastcol=remove(listoflastcol,length(listoflastcol)-1);
     
-        -- Finding the ratios between the last columns entries and respective pivot column entries
+        -- the ratio of entries in last column/entries in pivot column
     	listofdividends=apply(listoflastcol,listofpivotcol,(i,j)->(
 		if j==0 then infinity else i/j));	   
 
        	-- This is the row we select for our row operations
     	rownum=position(listofdividends,i->i==min(listofdividends));    
 -- %%%%%%%%%%%%%%%%%%%
- 
-        -- Normalize the row about the pivot
+
+-- %%%%%%%%%%%%%%%%%%
+-- Make this its own method!!!
+ {*
+        -- Normalize the selected row about the pivot
     	matrix1=rowMult(mutableMatrix(matrix1),rownum,(1/(listofpivotcol#rownum)));
     	listofpivotcol=flatten(entries((matrix matrix1)_(colnum)));
 
@@ -119,8 +129,14 @@ SimplexProc(Matrix) :=  matrix1  -> (
 	    if listofpivotcol#i!=1 or 
     	    listofpivotcol#i!=0 then rowAdd(matrix1,i,-listofpivotcol#i,rownum));
 	
+	-- convert back to matrix
 	matrix1=matrix(matrix1);
-	
+*}	
+-- End of what should be its own method
+-- %%%%%%%%%%%%%%%%%%%
+
+matrix1=reduceAtPivot(matrix1,rownum,colnum);
+
         -- Find the new smallest entry in the last row
         lastrow=flatten(entries(matrix1^{numRows(matrix1)-1}));
     	smallest=min(lastrow);
@@ -148,7 +164,6 @@ getMaxCoordinates(Matrix):= matrix1 -> (
     local coordinates;
     local listoflastcol; 
 
-   count=0; 
    listoflastcol=flatten(entries(matrix1_(numColumns(matrix1)-1)));
    coordinates=new BasicList;
 
@@ -156,7 +171,7 @@ getMaxCoordinates(Matrix):= matrix1 -> (
    numOfVars=numColumns(matrix1)-numRows(matrix1)-1;    
    
    --If a column for the variable has more than one coefficient for it, that variable is set to 0, otherwise it is given the value in the respective row
-   for i from 0 to numOfVars-1 do(
+   for i from 1 to numOfVars do(
        count=0;
        listofcol=flatten(entries(matrix1_i));
        for j from 0 to #listoflastcol-1 do(
@@ -191,6 +206,51 @@ loopstop=numColumns(matrix1)-3;
 for i from numOfVars to loopstop do(coordinates=append(coordinates,lastrow#i); );    --The numbers at these locations are the coordinates for minimizing the cost
 return coordinates;
 )
+
+--++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+-- Input:  Matrix
+
+-- Output:  Matrix
+
+-- Description: 
+-- This method applies Gauss-Jordan focused on the pivot at
+-- location (rowi,colj)
+reduceAtPivot=method()
+reduceAtPivot(Matrix,ZZ,ZZ) :=  (matrix1,rowi,colj)  -> (
+    local matrix1;
+    local rowi;
+    local colj;
+    local selectedCol;  
+        
+    	-- convert matrix to have real entries
+        matrix1=sub(matrix1,RR);	   
+    
+        -- This is the column of index colj
+    	selectedCol=flatten(entries((matrix matrix1)_(colj)));
+
+    	-- Make sure the rowi,colj entry is not 0
+    	if selectedCol#rowi == 0 then error "there is a 0 at this pivot";
+	
+    	-- Multiply rowi by 1/(rowi,colj) entry
+	matrix1=rowMult(mutableMatrix(matrix1),rowi,(1/(selectedCol#rowi)));
+    	
+        -- Reduce other rows around the pivotcolumn
+    	for i from 0 to #selectedCol-1 do (
+	    if selectedCol#i!=1 or 
+    	    selectedCol#i!=0 then rowAdd(matrix1,i,-selectedCol#i,rowi));
+	
+	-- convert back to matrix
+	matrix1=matrix(matrix1);
+
+
+return matrix1;
+)
+  
+--++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+
+
 --++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 -- Input: Mutable Matrix
@@ -201,8 +261,11 @@ return coordinates;
 -- This method will put the given matrix
 -- into row reduced echelon form.
 rref=method()
-rref(MutableMatrix) :=  matrix2  -> (
-local count;local row;local matrix2;local changerow;    
+rref(Matrix) :=  matrix2  -> (
+    local count;
+    local row;
+    local matrix2;
+    local changerow;    
     
 count=numRows(matrix2)-1;
 for j from 0 to count do(
@@ -267,7 +330,7 @@ local count; local matrix1; local coordinates; local list1; local optimizedCost;
     --The simplex procedure is done on the matrix
     matrix1=matrix(newList); -- T$ change to get rid of mutableMatrix now matrix
     matrix1=rowMult(matrix1,numRows(matrix1)-1,-1);
-    matrix1=SimplexProc(matrix1);
+    matrix1=simplexProc(matrix1);
     
     --Coordinates are found depending on goal of our optimiziation
     if opts.Optimize==Max then coordinates = getMaxCoordinates(matrix1);
@@ -314,8 +377,8 @@ loadPackage "LinearProgramming"
 maxSample = {{1,3,2,10},{1,5,1,8},{8,10,7,0}}
 maxSample = {{2,1,1,14},{4,2,3,28},{2,5,5,30},{1,2,-1,0}}
 
-maxSample = matrix({{1,4,5,2,1},{3,1,5,2,6},{4,2,-3,-3,-6}})
-SimplexProc(matrix maxSample)
+maxSample = matrix({{1,4,5,2,1},{3,1,5,2,6},{4,2,-3,-3,0}})
+simplexProc(maxSample)
 
 simplex(maxSample,Optimize=>Max)
 
@@ -342,7 +405,9 @@ rank matrix2
 restart
 loadPackage"LinearProgramming"
 M = matrix {{0,2,3,1,1,0,0,5},{0,4,1,2,0,1,0,11},{0,3,4,2,0,0,1,8},{1,-5,-4,-3,0,0,0,0}}
-SimplexProc M
+N = simplexProc M
+getMaxCoordinates N
+reduceAtPivot(M,1,3)
 simplex M
 
 

@@ -295,7 +295,7 @@ return matrix2;
 --++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 
--- Input: A List of Lists and Option
+-- Input: A Matrix
 
 -- Output: A Matrix, List of Numbers (The values of the variables to optimize), and A Number (The max/min cost value)
 
@@ -312,7 +312,7 @@ return matrix2;
 -- Restraint functions should be set to be less than or equal to a constant for maximization.
 
 simplexMethod=method(Options=> {Optimize=>Max})
-simplexMethod(List) := opts-> list1  -> (   
+simplexMethod(Matrix) := opts-> matrix1  -> (   
     local newList; 
     local tempList; 
     local tempElement; 
@@ -321,16 +321,17 @@ simplexMethod(List) := opts-> list1  -> (
     local coordinates; 
     local list1; 
     local optimizedCost;
-
+    local matrix1;
+    
      -- To minimize, take transpose
-    if opts.Optimize==Min then(list1 = entries(transpose(matrix(list1))););    
+    if opts.Optimize==Min then(matrix1 = transpose(matrix1););    
     
     newList=new List;
     
     -- i ranges over the rows of the matrix
     for i from 0 to #list1-1 do(
  	--Gets the list we wish to add extra slack variables
-       	tempList=list1#i;   
+       	tempList=flatten(entries(matrix1^{i}));   
 	
 	--The constant for the cost function is placed after the slacks
        	tempElement=tempList#(#tempList-1);    
@@ -425,6 +426,10 @@ rank matrix2
 restart
 loadPackage"LinearProgramming"
 M = matrix {{0,2,3,1,1,0,0,5},{0,4,1,2,0,1,0,11},{0,3,4,2,0,0,1,8},{1,-5,-4,-3,0,0,0,0}}
+
+entries(M)
+flatten entries M^{1}
+
 Mess = matrix {{0,2,0,1,1,0,0,5},{0,4,0,2,0,1,0,11},{0,3,4,2,0,0,1,8},{1,-5,-4,-3,0,0,0,0}}
 N = simplexProc M
 Ness = simplexProc Mess
@@ -435,5 +440,6 @@ simplexMethod M
 
 flatten M
 entries M
+transpose M
 simplexMethod entries M
 -- tom

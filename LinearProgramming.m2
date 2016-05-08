@@ -84,14 +84,19 @@ SimplexProc(Matrix) :=  matrix1  -> (
     matrix1=sub(matrix1,RR);	   
     --numberofRows = numRows(matrix1);
     	
-    -- initialize to smallest entry of cost function
+    -- last row is the cost function
     lastrow=flatten(entries(matrix1^{numRows(matrix1)-1}));
+
+    -- smallest entry in cost function
     smallest=min(lastrow);
 
     -- if there are no negatives in the list, then we are done
     while smallest < 0 do(
 -- %%%%%%%%%%%%%%%%
 -- This section first finds which row we apply row reduction to
+-- simplex method: pick pivot column j with smallest(largest) coeff of cost function
+-- pick the row i where the ratio of last entry/pivot column entry is min
+-- apply Gauss-Jordan with (i,j) entry as pivot position
 	     
     	-- the index of the pivot column
     	colnum=position(lastrow,i-> i == smallest);

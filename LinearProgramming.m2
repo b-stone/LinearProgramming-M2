@@ -43,8 +43,8 @@ export {
      "getMaxCoordinates",
      "getMinCoordinates",
      "rref",
-     "simplex"
-
+     "simplex",
+     "reduceAtPivot"
 }
 
 
@@ -204,6 +204,62 @@ loopstop=numColumns(matrix1)-3;
 for i from numOfVars to loopstop do(coordinates=append(coordinates,lastrow#i); );    --The numbers at these locations are the coordinates for minimizing the cost
 return coordinates;
 )
+
+--++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+-- Input:  Matrix
+
+-- Output:  Matrix
+
+-- Description: 
+-- This method applies Gauss-Jordan focused on the pivot at
+-- location (rowi,colj)
+reduceAtPivot=method()
+reduceAtPivot(Matrix,ZZ,ZZ) :=  (matrix1,rowi,colj)  -> (
+    local matrix1;
+    local rowi;
+    local colj;
+    local selectedCol;  
+    
+        matrix1=sub(matrix1,RR);	   
+    
+         -- Normalize the selected row about the pivot
+    	selectedCol=flatten(entries((matrix matrix1)_(colj)));
+	matrix1=rowMult(mutableMatrix(matrix1),rowi,(1/(selectedCol#rowi)));
+    	
+        -- Reduce other rows around the pivotcolumn
+    	for i from 0 to #selectedCol-1 do (
+	    if selectedCol#i!=1 or 
+    	    selectedCol#i!=0 then rowAdd(matrix1,i,-selectedCol#i,rowi));
+	
+	-- convert back to matrix
+	matrix1=matrix(matrix1);
+
+
+
+  {*  
+count=numRows(matrix2)-1;
+for j from 0 to count do(
+    row=flatten(entries(matrix2^{j}));
+    if row#j != 0 then(
+    matrix2=rowMult(matrix2,j,1/row#j);	   --Divideds the row by the pivot value
+    row=flatten(entries(matrix2^{j}));	  
+    for i from 0 to count do(
+	if j!=i then(
+	    changerow=flatten(entries(matrix2^{i}));	--Gets the next row that needs to be reduced around the pivot
+	    matrix2=rowAdd(matrix2,i,-changerow#j/row#j,j);
+	   );
+	);
+    );
+);
+*}
+return matrix1;
+)
+  
+--++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+
+
 --++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 -- Input: Mutable Matrix
@@ -360,6 +416,7 @@ loadPackage"LinearProgramming"
 M = matrix {{0,2,3,1,1,0,0,5},{0,4,1,2,0,1,0,11},{0,3,4,2,0,0,1,8},{1,-5,-4,-3,0,0,0,0}}
 N = simplexProc M
 getMaxCoordinates N
+reduceAtPivot(M,1,1)
 simplex M
 
 

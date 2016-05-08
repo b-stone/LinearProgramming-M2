@@ -299,14 +299,13 @@ return matrix2;
 
 -- Input: A Matrix
 
--- Output: A Matrix, List of Numbers (The values of the variables to optimize), and A Number (The max/min cost value)
+-- Output: A Matrix
 
 -- Description: 
--- This applies the simplex method to a given list of lists. It will minimize or maximize, depending
--- on what the user opts to do.
+-- This adds slack variables to the matrix
 
 -- Additional/Necessary Information:
--- The list of list should have the order: restraints followed by cost function.
+-- The matrix should have the order: restraints followed by cost function.
 -- A list inside the list should be: coefficient 1, coefficient 2, etc, restraint constant. 
 -- Cost functions should be set to 0.
 -- All the variables should be restrained by 0. 
@@ -324,12 +323,8 @@ addSlack(Matrix) := matrix1  -> (
     local list1; 
     local optimizedCost;
     local matrix1;
-    
-     -- To minimize, take transpose
-    if opts.Optimize==Min then(matrix1 = transpose(matrix1););    
- 
- --%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
- -- this will be a new method: addSlack(matrix)   
+     
+
     newList=new List;
     
     -- i ranges over the rows of the matrix
@@ -360,11 +355,8 @@ addSlack(Matrix) := matrix1  -> (
     matrix1=matrix(rowMult(mutableMatrix(matrix1),numRows(matrix1)-1,-1));
     matrix1=simplexProc(matrix1);
     
-    --Coordinates are found depending on goal of our optimiziation
-    if opts.Optimize==Max then coordinates = getMaxCoordinates(matrix1);
-    if opts.Optimize==Min then coordinates = getMinCoordinates(matrix1);
-    optimizedCost=matrix1_(numRows(matrix1)-1,numColumns(matrix1)-1);
-    return {matrix1,coordinates,optimizedCost};
+
+    return matrix1;
  )
 
 

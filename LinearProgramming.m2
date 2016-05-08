@@ -337,11 +337,12 @@ rank matrix2
 
 
 
--- branden
+-- tom
 
 restart
 loadPackage"LinearProgramming"
-M = {{0,2,3,1,1,0,0,5},{0,4,1,2,0,1,0,11},{0,3,4,2,0,0,1,8},{-1,5,4,3,0,0,0,0}}
+M = matrix {{0,2,3,1,1,0,0,5},{0,4,1,2,0,1,0,11},{0,3,4,2,0,0,1,8},{1,-5,-4,-3,0,0,0,0}}
+SimplexProc M
 simplex M
 
 

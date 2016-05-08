@@ -313,6 +313,9 @@ loadPackage "LinearProgramming"
 maxSample = {{1,3,2,10},{1,5,1,8},{8,10,7,0}}
 maxSample = {{2,1,1,14},{4,2,3,28},{2,5,5,30},{1,2,-1,0}}
 
+maxSample = matrix({{1,4,5,2,1},{3,1,5,2,6},{4,2,0-3,0-3,0-6}})
+SimplexProc(maxSample)
+
 simplex(maxSample,Optimize=>Max)
 
 

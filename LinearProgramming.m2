@@ -116,6 +116,9 @@ simplexProc(Matrix) :=  matrix1  -> (
        	-- This is the row we select for our row operations
     	rownum=position(listofdividends,i->i==min(listofdividends));    
 -- %%%%%%%%%%%%%%%%%%%
+
+-- %%%%%%%%%%%%%%%%%%
+-- Make this its own method!!!
  
         -- Normalize the selected row about the pivot
     	matrix1=rowMult(mutableMatrix(matrix1),rownum,(1/(listofpivotcol#rownum)));
@@ -129,6 +132,9 @@ simplexProc(Matrix) :=  matrix1  -> (
 	-- convert back to matrix
 	matrix1=matrix(matrix1);
 	
+-- End of what should be its own method
+-- %%%%%%%%%%%%%%%%%%%%%%%%%%%
+
         -- Find the new smallest entry in the last row
         lastrow=flatten(entries(matrix1^{numRows(matrix1)-1}));
     	smallest=min(lastrow);

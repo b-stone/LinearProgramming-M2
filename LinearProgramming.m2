@@ -43,7 +43,7 @@ export {
      "getMaxCoordinates",
      "getMinCoordinates",
      "rref",
-     "simplex",
+     "simplexMethod",
      "reduceAtPivot"
 }
 
@@ -311,8 +311,8 @@ return matrix2;
 -- Restraint functions should be set to be greater than or equal to a constant for minimization.
 -- Restraint functions should be set to be less than or equal to a constant for maximization.
 
-simplex=method(Options=> {Optimize=>Max})
-simplex(List) := opts-> list1  -> (   
+simplexMethod=method(Options=> {Optimize=>Max})
+simplexMethod(List) := opts-> list1  -> (   
     local newList; 
     local tempList; 
     local tempElement; 
@@ -400,14 +400,14 @@ maxSample = {{2,1,1,14},{4,2,3,28},{2,5,5,30},{1,2,-1,0}}
 maxSample = matrix({{1,4,5,2,1},{3,1,5,2,6},{4,2,-3,-3,0}})
 simplexProc(maxSample)
 
-simplex(maxSample,Optimize=>Max)
+simplexMethod(maxSample,Optimize=>Max)
 
 
 --Sample minimization problem
 minSample = {{3,2,2},{5,1,3},{29,10,0}}
 minSample = {{60,60,300},{12,6,36},{10,30,90},{.12,.15,0}}
 
-simplex(minSample,Optimize=>Min)
+simplexMethod(minSample,Optimize=>Min)
 
 
 --Sample rref problems
@@ -431,8 +431,9 @@ Ness = simplexProc Mess
 getMaxCoordinates N
 getMaxCoordinates Ness
 reduceAtPivot(M,1,3)
-simplex M
+simplexMethod M
+
 flatten M
 entries M
-simplex entries M
+simplexMethod entries M
 -- tom

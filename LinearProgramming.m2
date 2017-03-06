@@ -313,32 +313,99 @@ return matrix2;
 -- Restraint functions should be set to be greater than or equal to a constant for minimization.
 -- Restraint functions should be set to be less than or equal to a constant for maximization.
 
+--addSlack=method()
+--addSlack(Matrix) := matrix1  -> (   
+  --  local newList; 
+  --  local tempList; 
+  --  local tempElement; 
+  --  local indexLastRow; 
+  --  local matrix1; 
+  --  local list1; 
+  --  local matrix1;
+     
+--    newList=new List;
+
+--   indexLastRow=#entries(matrix1)-1;
+	    
+    -- i ranges over the rows of the matrix
+--   for i from 0 to indexLastRow do(
+	
+ 	-- get row i of the matrix
+--    	tempList=flatten(entries(matrix1^{i}));   
+	
+	-- temporarily remove the constant at the end
+--     	tempElement=tempList#(#tempList-1);    
+--     	tempList=remove(tempList,#tempList-1);
+	
+	-- j ranges over the number of rows
+--     	for j from 0 to indexLastRow  do(
+	    
+	    -- cost function gets -1 added
+--	    if j==indexLastRow and i==j then tempList=append(tempList,-1);
+	    
+	    -- row i gets 1 added i steps to right, otherwise 0 added
+--	    if j==i and j!=indexLastRow then tempList= append(tempList,1);
+--	    if j!=i then tempList= append(tempList,0);
+--	    );
+--       	tempList=append(tempList,tempElement);
+--       	newList=append(newList,tempList);
+--       	);
+
+--return matrix newList;
+--)
+
+--++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+
+-- Input: A Matrix
+
+-- Output: A Matrix
+
+-- Description: 
+-- This adds slack variables to the matrix
+
+-- Additional/Necessary Information:
+-- The matrix should have the order: restraints followed by cost function.
+-- The input matrix should have a preface column to determine less than or greater
+-- than for the constraint fucntions -1 for less than and 1 for greater than.
+-- For example take the set of equations
+--x+2y<5
+--2x+3y>4
+--z=x+y
+--would correspond to the matrix -1 0 1 2 5
+--                                1 0 2 3 4
+--                                0 1 -1 -1 0
+
 addSlack=method()
 addSlack(Matrix) := matrix1  -> (   
-    local newList; 
+--    local newList; 
     local tempList; 
     local tempElement; 
-    local indexLastRow; 
+    local prefaceRow;
+    local indexLastRow;
+    local indexFirstRow; 
     local matrix1; 
     local list1; 
     local matrix1;
+    local constants;
+    
      
     newList=new List;
 
     indexLastRow=#entries(matrix1)-1;
-	    
-    -- i ranges over the rows of the matrix
-    for i from 0 to indexLastRow do(
-	
- 	-- get row i of the matrix
-       	tempList=flatten(entries(matrix1^{i}));   
-	
-	-- temporarily remove the constant at the end
-       	tempElement=tempList#(#tempList-1);    
-       	tempList=remove(tempList,#tempList-1);
-	
+    indexFirstRow=0;
+   
+  --Takes out the first row that cooresponds to < / >
+    prefaceRow = flatten(matrix1_[indexFirstRow]);
+  --Removes it
+    remove(matrix1_[indexFirstRow]);
+           
+
+    contrants=flatten(matrix1_[indexLastRow]);
+    remove(matrix1_[indexLastRow]);
 	-- j ranges over the number of rows
        	for j from 0 to indexLastRow  do(
+	    
 	    
 	    -- cost function gets -1 added
 	    if j==indexLastRow and i==j then tempList=append(tempList,-1);
@@ -353,6 +420,7 @@ addSlack(Matrix) := matrix1  -> (
 
 return matrix newList;
 )
+
 
 
 

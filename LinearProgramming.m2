@@ -313,46 +313,52 @@ return matrix2;
 -- Restraint functions should be set to be greater than or equal to a constant for minimization.
 -- Restraint functions should be set to be less than or equal to a constant for maximization.
 
---addSlack=method()
---addSlack(Matrix) := matrix1  -> (   
-  --  local newList; 
-  --  local tempList; 
-  --  local tempElement; 
-  --  local indexLastRow; 
-  --  local matrix1; 
-  --  local list1; 
-  --  local matrix1;
+addSlack=method()
+addSlack(Matrix) := matrix1  -> (   
+    local newList; 
+    local tempList; 
+    local tempElement; 
+    local indexLastRow; 
+    local matrix1; 
+    local list1; 
+    local matrix1;
      
---    newList=new List;
+    newList=new List;
 
---   indexLastRow=#entries(matrix1)-1;
+   indexLastRow=#entries(matrix1)-1;
 	    
     -- i ranges over the rows of the matrix
---   for i from 0 to indexLastRow do(
+    for i from 0 to indexLastRow do(
 	
  	-- get row i of the matrix
---    	tempList=flatten(entries(matrix1^{i}));   
+    	tempList=flatten(entries(matrix1^{i}));   
+	
 	
 	-- temporarily remove the constant at the end
---     	tempElement=tempList#(#tempList-1);    
---     	tempList=remove(tempList,#tempList-1);
+     	    
+     	remove(tempList,#tempList-2);
+	
+	
+	-- temporarily remove the constant at the end
+     	tempElement=tempList#(#tempList-1);    
+     	tempList=remove(tempList,#tempList-1);
 	
 	-- j ranges over the number of rows
---     	for j from 0 to indexLastRow  do(
+     	for j from 0 to indexLastRow  do(
 	    
 	    -- cost function gets -1 added
---	    if j==indexLastRow and i==j then tempList=append(tempList,-1);
+	    if j==indexLastRow and i==j then tempList=append(tempList,-1);
 	    
 	    -- row i gets 1 added i steps to right, otherwise 0 added
---	    if j==i and j!=indexLastRow then tempList= append(tempList,1);
---	    if j!=i then tempList= append(tempList,0);
---	    );
---       	tempList=append(tempList,tempElement);
---       	newList=append(newList,tempList);
---       	);
+	    if j==i and j!=indexLastRow then tempList= append(tempList,1);
+	    if j!=i then tempList= append(tempList,0);
+	    );
+       	tempList=append(tempList,tempElement);
+       	newList=append(newList,tempList);
+       	);
 
---return matrix newList;
---)
+return matrix newList;
+)
 
 --++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
@@ -376,6 +382,23 @@ return matrix2;
 --                                1 0 2 3 4
 --                                0 1 -1 -1 0
 
+
+TEST///
+restart
+loadPackage"LinearProgramming"
+M = matrix {{2,3,1,1,0,0,0,5},{4,1,2,0,1,0,0,11},{3,4,2,0,0,1,0,8},{5,4,3,0,0,0,-1,0}}
+addSlack M
+simplexMethod (M,Slack=>true)
+
+MyTest = matrix {{2,3,1,5},{4,1,2,11},{3,4,2,8},{5,4,3,0}}
+addSlack MyTest
+simplexMethod MyTest
+
+minSample = matrix {{3,2,2},{5,1,3},{29,10,0}}
+addSlack minSample
+///
+
+{*
 addSlack=method()
 addSlack(Matrix) := matrix1  -> (   
 --    local newList; 
@@ -384,9 +407,9 @@ addSlack(Matrix) := matrix1  -> (
     local prefaceRow;
     local indexLastRow;
     local indexFirstRow; 
-    local matrix1; 
+--    local matrix1; 
     local list1; 
-    local matrix1;
+--    local matrix1;
     local constants;
     
      
@@ -401,7 +424,7 @@ addSlack(Matrix) := matrix1  -> (
     remove(matrix1_[indexFirstRow]);
            
 
-    contrants=flatten(matrix1_[indexLastRow]);
+    constants=flatten(matrix1_[indexLastRow]);
     remove(matrix1_[indexLastRow]);
 	-- j ranges over the number of rows
        	for j from 0 to indexLastRow  do(
@@ -421,7 +444,7 @@ addSlack(Matrix) := matrix1  -> (
 return matrix newList;
 )
 
-
+*}
 
 
 --++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++

@@ -22,11 +22,10 @@ newPackage(
     	Authors => {       
 	     {Name => "Branden Stone", Email => "bstone@adelphi.edu", HomePage => "http://math.adelpi.edu/~bstone/"},
      	     {Name => "Thomas Enkosky", Email => "tenkosky@gmail.com"},
-	     {Name => "Harmit Minhas", Email => "harmitminhas@mail.adelphi.edu"},
-	     {Name => "Kyle Murray", Email => "kylemurray@mail.adelphi.edu"}	     
+	     {Name => "Harmit Minhas", Email => "harmitminhas@mail.adelphi.edu"}	     
 	     },
     	Headline => "LinearProgramming",
-    	DebuggingMode => true
+    	DebuggingMode => false
 --	PackageExports => {"Graphs", "Posets", "SimplicialComplexes"},
 --	AuxiliaryFiles => true,
 --	Configuration => {"DefaultPath" => null } 
@@ -35,15 +34,15 @@ newPackage(
 export {
     
     -- Options
---     "Optimize",
---     "Max",
---     "Min",
+     "Optimize",
+     "Max",
+     "Min",
      "Slack",
     
     -- Methods
      "simplexProc",
      "getMaxCoordinates",
- --     "getMinCoordinates",
+     "getMinCoordinates",
      "rref",
      "simplexMethod",
      "reduceAtPivot",
@@ -206,7 +205,6 @@ return coordinates;
 -- cost function, in order to minimize the cost value.
 --
 -- There's no way this works.  it looks like it's for a specific example
-{*
 getMinCoordinates=method()
 getMinCoordinates(MutableMatrix):= matrix1 ->(
 local coordinates; local numOfVars; local lastrow; local loopstop;
@@ -219,7 +217,6 @@ for i from numOfVars to loopstop do(coordinates=append(coordinates,lastrow#i); )
 return coordinates;
 )
 
-*}
 --++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 -- Input:  Matrix
@@ -277,8 +274,9 @@ rref=method()
 rref(Matrix) :=  matrix2  -> (
     local count;
     local row;
+    local matrix2;
     local changerow;    
-    matrix2 = mutableMatrix(sub(matrix2,QQ));
+    
 count=numRows(matrix2)-1;
 for j from 0 to count do(
     row=flatten(entries(matrix2^{j}));
@@ -293,7 +291,6 @@ for j from 0 to count do(
 	);
     );
 );
-matrix2 = matrix matrix2;
 return matrix2;
 )
   
@@ -316,8 +313,6 @@ return matrix2;
 -- Restraint functions should be set to be greater than or equal to a constant for minimization.
 -- Restraint functions should be set to be less than or equal to a constant for maximization.
 
-<<<<<<< HEAD
-=======
 addSlack=method()
 addSlack(Matrix) := matrix1  -> (   
     local newList; 
@@ -366,12 +361,26 @@ return matrix newList;
 )
 
 --++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
->>>>>>> 779fbe93813d005cfb06cecdd97e5a718a42ace3
 
 
+-- Input: A Matrix
 
+-- Output: A Matrix
 
+-- Description: 
+-- This adds slack variables to the matrix
 
+-- Additional/Necessary Information:
+-- The matrix should have the order: restraints followed by cost function.
+-- The input matrix should have a preface column to determine less than or greater
+-- than for the constraint fucntions -1 for less than and 1 for greater than.
+-- For example take the set of equations
+--x+2y<5
+--2x+3y>4
+--z=x+y
+--would correspond to the matrix -1 0 1 2 5
+--                                1 0 2 3 4
+--                                0 1 -1 -1 0
 
 
 TEST///
@@ -392,21 +401,9 @@ addSlack minSample
 {*
 addSlack=method()
 addSlack(Matrix) := matrix1  -> (   
-    local newList; 
+--    local newList; 
     local tempList; 
     local tempElement; 
-<<<<<<< HEAD
-    local indexLastRow; 
-    local matrix1; 
-    local list1; 
-    local matrix1;
-    local ZColElement;
-     
-     indexLastRow=#entries(matrix1)-1;
-     
-     newList=new List;
-    
-=======
     local prefaceRow;
     local indexLastRow;
     local indexFirstRow; 
@@ -432,53 +429,24 @@ addSlack(Matrix) := matrix1  -> (
 	-- j ranges over the number of rows
        	for j from 0 to indexLastRow  do(
 	    
->>>>>>> 779fbe93813d005cfb06cecdd97e5a718a42ace3
 	    
-    -- i ranges over the rows of the matrix
-   for i from 0 to indexLastRow do(
-	
- 	-- get row i of the matrix
-    	tempList=flatten(entries(matrix1^{i}));   
-	
-	-- temporarily remove the constant at the end
-    	tempElement=tempList#(#tempList-1);    
-     	tempList=remove(tempList,#tempList-1);
-	
-	--also remove column before last
-	
-	ZColElement=tempList#(#tempList-1);
-	tempList=remove(tempList,#tempList-1);
-	
-	
-	
-	
-	-- j ranges over the number of columns
-	--adds slack vars based on number of columns
-    	for j from 0 to indexLastRow-1  do(
+	    -- cost function gets -1 added
+	    if j==indexLastRow and i==j then tempList=append(tempList,-1);
 	    
-
-	   
-	  --   row i gets 1 added i steps to right, otherwise 0 added
-	     if j==i then tempList= append(tempList,1);
-	     if j!=i then tempList= append(tempList,0);
-	   );
-     	tempList=append(tempList,ZColElement);
+	    -- row i gets 1 added i steps to right, otherwise 0 added
+	    if j==i and j!=indexLastRow then tempList= append(tempList,1);
+	    if j!=i then tempList= append(tempList,0);
+	    );
        	tempList=append(tempList,tempElement);
        	newList=append(newList,tempList);
-     	);
-    
-    	
-	
+       	);
 
- return matrix newList;
+return matrix newList;
 )
-<<<<<<< HEAD
-=======
 
 *}
 
 
->>>>>>> 779fbe93813d005cfb06cecdd97e5a718a42ace3
 --++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 
@@ -498,7 +466,7 @@ addSlack(Matrix) := matrix1  -> (
 -- Restraint functions should be set to be greater than or equal to a constant for minimization.
 -- Restraint functions should be set to be less than or equal to a constant for maximization.
 
-simplexMethod=method(Options=> {Slack=>false})
+simplexMethod=method(Options=> {Optimize=>Max,Slack=>false})
 simplexMethod(Matrix) := opts-> matrix1  -> (   
     local newList; 
     local tempList; 
@@ -511,16 +479,15 @@ simplexMethod(Matrix) := opts-> matrix1  -> (
     local matrix1;
     
      -- To minimize, take transpose
-     --  if opts.Optimize==Min then(matrix1 = transpose(matrix1););
-      if opts.Slack==false then matrix1=addSlack(matrix1);    
+    if opts.Optimize==Min then(matrix1 = transpose(matrix1););
+    if opts.Slack==false then matrix1=addSlack(matrix1);    
     
-   -- matrix1=matrix(rowMult(mutableMatrix(matrix1),numRows(matrix1)-1,-1));
+    --matrix1=matrix(rowMult(mutableMatrix(matrix1),numRows(matrix1)-1,-1));
     matrix1=simplexProc(matrix1);
     
     --Coordinates are found depending on goal of our optimiziation
-    coordinates = getMaxCoordinates(matrix1);
---    if opts.Optimize==Max then coordinates = getMaxCoordinates(matrix1);
---    if opts.Optimize==Min then coordinates = getMinCoordinates(matrix1);
+    if opts.Optimize==Max then coordinates = getMaxCoordinates(matrix1);
+    if opts.Optimize==Min then coordinates = getMinCoordinates(matrix1);
     optimizedCost=matrix1_(numRows(matrix1)-1,numColumns(matrix1)-1);
     return {matrix1,coordinates,optimizedCost};
  )
@@ -530,277 +497,10 @@ simplexMethod(Matrix) := opts-> matrix1  -> (
 --------------------------------------------------
 -- DOCUMENTATION
 --------------------------------------------------
-beginDocumentation()
-
-doc ///
-    Key
-    	LinearProgramming
-    Headline
-        A package full of linear programming tools
-    Description
-        Text
-	    Really cool stuff is coming stay tuned.
-
-///
-
-doc ///
-    Key
-    	addSlack
-	(addSlack,Matrix)
-    Headline
-        Adds slack variables to a matrix problem.
-    Usage
-    	N = addSlack M
-    Inputs
-    	M:Matrix
-	    Does not contain slack variables.
-    Outputs
-    	N:Matrix 
-	    Containing slack variables.
-    Description
-        Text
-	    This method is responsible for puting slack variables into the matrix. Slack variables
-	    are variables that are used to get rid of the inequalities in the contraint equations.
-	    There are some assumptions associated with this method. First we assume that all constraint
-	    equations are $\leq$. The other assumption is that the function is set up for maximization 
-	    and the z value is negative. The cost function must also be the last row with the z value in
-	    the last column. 
-	    Lookin at an example:
-	    
-	    Min
-	   $z=-2x + 3y $ , this is the cost function.
-	    
-	   $x - 3y + 2z \leq 3$
-	    
-	   $ -x +2y \geq 2$
-	    
-	    The matrix representation of this is:
-	   
-	Example
-    	     P = matrix {{1,-3,2,0,3},{1,-2,0,0,-2},{-2,3,0,-1,0}}
-	Text     
-	    Notice the cost function was moved to the bottom and the z column is placed before the constants.
-	    In the z column all values should be 0 execpt in the cost funtion row. We need to then comply with
-	    our assumptions and change the $\geq$ to a $\leq$ simply by multiplying the row by -1.
-	    We also consider -z instead of z and change the row accordingly depending on whether we are minimizing 
-	    or maximizing. Remeber we will change everything to be always maximizing.
-	   
-	Example   
-	    R = matrix {{1,-3,2,0,3},{1,-2,0,0,-2},{-2,3,0,-1,0}}
-	Text    
-	    Notice the change in the second row, the constraint vars and the constant got negated.
-	    Also notice the z was changed to -z and nothing else in the row was affected.
-	    If however the problem was to maximize you would instead negate the entire row.
-	    
-
-	Example
-	    M = matrix {{1,-3,2,0,3},{1,-2,0,0,-2},{-2,3,0,-1,0}}
-	    N = addSlack M
-	Text 
-	    
-            Now the slack variables have be added to all of your constraint rows and they
-	    their entries will  always be 1 due to making all of the contraints $\leq.$
-
-///
----------------------------------------------------------------------------------------
-
-doc ///
-    Key
-    	rref
-	(rref,Matrix)
-    Headline
-        Reduced a matrix to a matrix in reduced row echelon form.
-    Usage
-    	N = rref  M
-    Inputs
-    	M:Matrix
-	    Not in reduced row echelon form.
-    Outputs
-    	N:Matrix 
-	    In reduced row echelon form.
-    Description
-        Text
-             Row echelon form follows two conditions, all zero rows belong at the bottom of the matix 
-             and the pivot of a nonzero row is to the right of the pivot above it. Reduced row echelon form
-	     is a matrix in row echelon form and the pivots are one and the only nonzero entry in the column. 
-    
-        Example
-             M = matrix {{3,9,8,3},{1,4,2,4},{7,4,2,9},{3,7,1,4}}
-             N = rref M
-///
 
 
----------------------------------------------------------------------------
-doc ///
-    Key
-    	simplexProc
-	(simplexProc,Matrix)
-    Headline
-        Given a matrix in order with slack variables added, this method applies the simplex method to it.
-    Usage
-    	N = simplexProc M
-    Inputs
-    	M:Matrix
-	   
-    Outputs
-    	N:Matrix 
-	    With the simplex method applied to it.
-    Description
-        Text
-	   This function selects the largest or smallest entry of the last row. The function then selects the column assocaited with that value.
-	   This column is the pivot column. It then finds the ratio of the last column and pivot column. The smallest of these ratios determines the 
-	   pivot at which to do row reduction. 
-	      
-	Example
-    	   M = matrix {{1,4,5,2,1},{3,1,5,2,6},{4,2,-3,-3,0}}
-	   N = simplexProc M  
-	   
-
-///
--------------------------------------------------------------------------
-doc ///
-    Key
-    	getMaxCoordinates
-     	(getMaxCoordinates,Matrix)
-    Headline
-        This method returns the coefficients of the cost function.
-    Usage
-    	N = getMaxCoordinates M
-    Inputs
-    	M:Matrix
-	   
-    Outputs
-    	N:List 
-	    List of coefficients for the cost function.
-    Description
-        Text
-	    This function is used for producing the overall answer of the simplex problem.
-	    The simplex problem is based off of finding the max or min for cost functions. 
-	    It takes the output matrix from the simplexproc method, and gives back the
-	    coefficients for the cost function. 
-	      
-	Example
-    	   M = matrix {{1,2,0,2,0,-1,0,2},{0,-5,0,-2,1,0,0,1},{0,-1,1,-3,0,2,0,1},{0,-3,0,-1,0,-1,-1,-13}}
-	   N = getMaxCoordinates M  
-	   
-
-///
-
------------------------------------------------------------------------------------------
-doc ///
-    Key
-    	reduceAtPivot
-     	(reduceAtPivot,Matrix,ZZ,ZZ)
-    Headline
-        This method applies Gaussian-Jordan Elimination on the pivot at the row,column provided.
-    Usage
-    	N = reduceAtPivot M
-    Inputs
-    	M:Matrix
-	I:ZZ
-	J:ZZ   
-    Outputs
-    	N:Matrix 
-	    Reduced around pivot (row,column)
-    Description
-        Text
-	    This method will use the two integer parameters as the indicies for row and column.
-	    It will use the element of the ith row and the jth column and use that as the pivot.
-	    The ith row will be divided by the pivot value making the pivot 1. Then, with the pivot
-	    being 1 it will use row operations to make the values above and below the pivot 0.
-	Example
-    	    M = matrix {{3,4,1},{-1,3,5},{5,3,7}}
-	    N = reduceAtPivot(M,0,0)
-///
--------------------------------------------------------------------------------------------
-doc ///
-    Key
-    	simplexMethod
-     	(simplexMethod,Matrix)
-    Headline
-        This method ties it all together and completes the simplex method.
-    Usage
-    	N = simplexMethod M
-    Inputs
-    	M:Matrix
-    Outputs
-    	N:Matrix
-	L:List
-	P:ZZ 
-	   
-    Description
-        Text
-	   Before using this method you need to make sure the problem is set up correctly. Every 
-	   problem used by this package must be set up for maximization. However if your problem 
-	   uses minimization it is a simple process to convert it to maximization. 
-	   $z=-2x + 3y $ , this is the cost function.
-	    
-	   $x - 3y + 2z \leq 3$
-	    
-	   $ -x +2y \geq 2$
-
-	   The top equation with z is the cost equation. This example is set up for minimzation. 
-	   This provides the following matrix:
-	 Example 
-	   P = matrix {{1,-3,2,0,3},{1,-2,0,0,-2},{-2,3,0,-1,0}}
-	 Text
-	    Notice the cost function was moved to the bottom and the z column is placed before the constants.
-	    In the z column all values should be 0 execpt in the cost funtion row. We need to then comply with
-	    our assumptions and change the $\geq$ to a $\leq$ simply by multiplying the row by -1.
-	    We also consider -z instead of z and change the row accordingly depending on whether we are minimizing 
-	    or maximizing. Remeber we will change everything to be always maximizing.
-	   
-	Example   
-	    R = matrix {{1,-3,2,0,3},{1,-2,0,0,-2},{-2,3,0,-1,0}}
-	Text	
-	   This method will first check the slack option and use the addslack mehthod if necessary.
-	Example   
-	   M = addSlack R
-	Text  
-	   This example used the addslack method and now has the matrix with slack variables included.
-	   It then uses the simplexProc method on the matrix.
-	   The outputs are a list of the variables to optimize, a marix and a number which is the max cost
-	   value.
---	Example
-	   N = simplexMethod M
-	   
-    	   
-///
-
---------------------------------------------------------------------------------------
-{*
-doc ///
-    Key
-    	[(simplexMethod),Slack]
-    Headline
-    	An option to add slack if it hasn't been added already.
-    Usage
-    	simplexMethod(M,Slack=>false)
-    Inputs
-    	M:Matrix
-    Outputs
-    	N:Matrix
-	L:List
-	C:ZZ
-    Description	
-    	Text
-     	   blah 
- ///
-*}
 
 
--------------------------------------------------------------------------
-doc ///
-    Key
-    	Slack
-    Headline
-    	An option to add slack if it hasn't been added already.
-    Description	
-    	Text
-     	   If this option is true then slack variabes have already been added and it will not 
-	   call the addSlack method. If it is false it will use the addSlack method to add the 
-	   slack variables.
- ///
 
 -------------------------------------------------------------------------------------------
 -------------------------------------------------------------------------------------------
@@ -820,12 +520,6 @@ end
 -----------------------------
 -----------------------------
 
---kyle
-restart 
-uninstallPackage "LinearProgramming"
-restart
-installPackage "LinearProgramming"
-viewHelp LinearProgramming
 
 -- harmit
 
@@ -850,18 +544,11 @@ simplexMethod(minSample,Optimize=>Min)
 
 
 --Sample rref problems
-restart 
-uninstallPackage "LinearProgramming"
-installPackage "LinearProgramming"
-restart
-loadPackage "LinearProgramming"
-matrix1 = matrix{{1,1,1,-1},{1,2,4,3},{1,3,9,3}}
---matrix2=mutableMatrix(sub(matrix{{1,1,1,-1},{1,2,4,3},{1,3,9,3}},QQ))
---matrix2=mutableMatrix(sub(matrix{{1,2,1},{-2,-3,1},{3,5,0}},QQ))
---matrix2=matrix matrix2	 
---matrix2   
-rref(matrix1)
-rank matrix1	    
+matrix2=mutableMatrix(sub(matrix{{1,1,1,-1},{1,2,4,3},{1,3,9,3}},QQ))
+matrix2=mutableMatrix(sub(matrix{{1,2,1},{-2,-3,1},{3,5,0}},QQ))
+	    
+rref(matrix2)
+rank matrix2	    
 
 
 
@@ -871,7 +558,7 @@ rank matrix1
 restart
 loadPackage"LinearProgramming"
 M = matrix {{2,3,1,1,0,0,0,5},{4,1,2,0,1,0,0,11},{3,4,2,0,0,1,0,8},{5,4,3,0,0,0,-1,0}}
---addSlack M
+addSlack M
 simplexMethod (M,Slack=>true)
 
 MyTest = matrix {{2,3,1,5},{4,1,2,11},{3,4,2,8},{5,4,3,0}}
@@ -896,7 +583,7 @@ N = simplexProc M
 Ness = simplexProc Mess
 getMaxCoordinates N
 getMaxCoordinates Ness
-reduceAtPivot(Mess,1,1)
+reduceAtPivot(M,1,3)
 simplexMethod M
 
 flatten M

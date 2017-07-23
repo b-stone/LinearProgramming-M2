@@ -316,8 +316,6 @@ return matrix2;
 -- Restraint functions should be set to be greater than or equal to a constant for minimization.
 -- Restraint functions should be set to be less than or equal to a constant for maximization.
 
-<<<<<<< HEAD
-=======
 addSlack=method()
 addSlack(Matrix) := matrix1  -> (   
     local newList; 
@@ -366,7 +364,7 @@ return matrix newList;
 )
 
 --++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
->>>>>>> 779fbe93813d005cfb06cecdd97e5a718a42ace3
+
 
 
 
@@ -472,13 +470,9 @@ addSlack(Matrix) := matrix1  -> (
 
  return matrix newList;
 )
-<<<<<<< HEAD
-=======
 
 *}
 
-
->>>>>>> 779fbe93813d005cfb06cecdd97e5a718a42ace3
 --++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 

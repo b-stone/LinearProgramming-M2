@@ -125,6 +125,7 @@ simplexProc(Matrix) :=  matrix1  -> (
         -- Find the new biggest entry in the last row
         lastrow=flatten(entries(matrix1^{numRows(matrix1)-1}));
     	biggest=max(lastrow);
+	print("help!!!")
     );
 return matrix1;
 )
@@ -519,7 +520,17 @@ simplexMethod(Matrix) := opts-> matrix1  -> (
     return {matrix1,coordinates,optimizedCost};
  )
 
+///
+restart
+loadPackage"LinearProgramming"
+P = matrix {{1,-3,2,0,3},{1,-2,0,0,-2},{-2,3,0,-1,0}}
+simplexProc(addSlack P)
 
+
+
+simplexMethod(P, Slack => true)
+
+///
 
 --------------------------------------------------
 -- DOCUMENTATION
@@ -820,6 +831,9 @@ uninstallPackage "LinearProgramming"
 restart
 installPackage "LinearProgramming"
 viewHelp LinearProgramming
+
+P = matrix {{1,-3,2,0,3},{1,-2,0,0,-2},{-2,3,0,-1,0}}
+simplexMethod P
 
 -- harmit
 

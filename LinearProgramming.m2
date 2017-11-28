@@ -330,7 +330,7 @@ addSlack(Matrix) := matrix1  -> (
     newList=new List;
 
    indexLastRow=#entries(matrix1)-1;
-	    
+
     -- i ranges over the rows of the matrix
     for i from 0 to indexLastRow do(
 	
@@ -825,7 +825,7 @@ end
 -----------------------------
 -----------------------------
 
---kyle
+--vincent
 restart 
 uninstallPackage "LinearProgramming"
 restart

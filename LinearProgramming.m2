@@ -117,6 +117,7 @@ simplexProc(Matrix) :=  matrix1  -> (
 		if j==0 then infinity else i/j));	   
 
        	-- This is the row we select for our row operations
+	listofdividends=positions(listofdividends, i->i>0);--Added this to filter our negative ratios.
     	rownum=position(listofdividends,i->i==min(listofdividends));    
 
     	-- row reduce at this pivot
@@ -339,14 +340,12 @@ addSlack(Matrix) := matrix1  -> (
 	
 	
 	-- temporarily remove the constant at the end
-     	    
+    
      	remove(tempList,#tempList-2);
-	
 	
 	-- temporarily remove the constant at the end
      	tempElement=tempList#(#tempList-1);    
      	tempList=remove(tempList,#tempList-1);
-	
 	-- j ranges over the number of rows
      	for j from 0 to indexLastRow  do(
 	    

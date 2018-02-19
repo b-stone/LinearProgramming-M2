@@ -883,6 +883,7 @@ simplexMethod (M,Slack=>true)
 
 MyTest = matrix {{2,3,1,5},{4,1,2,11},{3,4,2,8},{5,4,3,0}}
 addSlack MyTest
+addSlack M
 simplexMethod MyTest
 
 minSample = matrix {{3,2,2},{5,1,3},{29,10,0}}
@@ -911,3 +912,19 @@ entries M
 transpose M
 simplexMethod entries M
 -- tom
+
+Mess
+L = entries Mess
+viewHelp List
+drop(L,-1)
+mutableMatrix L
+viewHelp mutableMatrix
+nrows = #L
+ncols = #L#0
+mutList = apply(nrows,l->apply(ncols+nrows,n-> 0))
+Mut = mutableMatrix mutList
+Mut_{0} = Mess_{0}
+Mut_(0,0) = Mess_(0,0)
+
+numcols Mut
+

@@ -928,3 +928,4 @@ Mut_(0,0) = Mess_(0,0)
 
 numcols Mut
 
+apply(4, l-> (print(hello); l+1))

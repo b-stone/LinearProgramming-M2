@@ -17,3 +17,26 @@ l = -1*l
 L = drop(L, -1)|{l}
 M = mutableMatrix L
 M = matrix rowMult(M,numRows(M)-1,-1)
+
+
+-- scan
+L = {{2,3,4},{5,6,7},{2,3,1,7,2}}
+l = last L
+test = true
+scan(l, i -> if i < 0 then (
+	q = position(l,g -> g < 0)
+	test = false;
+	)
+    )
+p
+test
+
+L = {{2,3,4},{5,6,7},{2,3,1,7,2}}
+l = last L
+q = position(l,g -> g < 0)
+null === q
+
+L = {{2,3,4},{5,6,7},{2,3,-1,7,-2}}
+l = last L
+q = position(l,g -> g < 0)
+null === q

@@ -17,4 +17,3 @@ l = -1*l
 L = drop(L, -1)|{l}
 M = mutableMatrix L
 M = matrix rowMult(M,numRows(M)-1,-1)
-    

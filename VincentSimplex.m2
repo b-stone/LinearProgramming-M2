@@ -70,6 +70,9 @@ findPivot=method() -- Input: Matrix, Output: Integer for pivot row, Function: Fi
 findPivot(Matrix) := costMatrix ->(
     local pivotRow;
     local pivotElement;
+    local pivotList;
+    local costRow;
+    
     --costMatrix = matrix{{2,3,1,0,0,4},{5,6,0,1,0,7},{(-1),(-5),0,0,1,0}}
     costRow = costMatrix^{numgens target costMatrix-1}_{0..numgens source costMatrix-2};
     pivotElement = position(flatten entries costRow, g -> g < 0);
@@ -85,6 +88,8 @@ findPivot(Matrix) := costMatrix ->(
 rowPivot = method() -- Input: Integer for row, Output: Matrix after pivot, Function: Carries out the row pivot.
 rowPivot(List, Matrix) := (pivotList, pivotMatrix) -> (
     local pivotedMatrix;
+    local multiplier;
+    
 
     --pivotMatrix = sub(matrix{{2,3,1,0,0,4},{5,6,0,1,0,7},{(-2),(-3),0,0,1,0}}, RR)
     pivotMatrix = mutableMatrix pivotMatrix;

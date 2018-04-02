@@ -21,7 +21,8 @@ newPackage(
     	Date => "March 7, 2018",
     	Authors => {       
 	     {Name => "Branden Stone", Email => "bstone@adelphi.edu", HomePage => "http://math.adelpi.edu/~bstone/"},
-	     {Name => "Vincent Schinina", Email => "vincentschinina@mail.adelphi.edu"},
+	     {Name => "Vincent Schinina", Email => "vincentschinina@mail.adelphi.edu"}
+	     },
     	Headline => "VincentSimplex",
     	DebuggingMode => true
     	)
@@ -122,29 +123,20 @@ simplexMethod(List) := costList -> (
    
     return solutionMatrix;
     )
------------------------------------------
------------------------------------------
------------------------------------------
-end
------------------------------------------
------------------------------------------
------------------------------------------
 
---test
+-----------------------------------------------------------------------------------------------------------------
+--TESTS
+-----------------------------------------------------------------------------------------------------------------
 
-restart
-needsPackage"VincentSimplex"
-simplexMethod {{2,1,4},{1,2,3},{1,1,0}}
-simplexMethod {{2,1,4},{1,2,3},{1,1/2,0}}
-simplexMethod {{3,1,6},{1,(-1),2},{0,1,3},{2,1,0}}
-simplexMethod {{1,2,6},{2,1,6},{1,1,0}}
-simplexMethod {{1,6,2,8},{1,0,3,9},{(-7),1,3,0}} 
-simplexMethod {{1,1,1,6},{5,3,6,15},{5,3,1,0}}
-simplexMethod {{2,5,1},{1,3,4},{6,7,0}}
-simplexMethod {{2,3,1,5},{4,1,2,11},{3,4,2,8},{5,4,3,0}}
-simplexMethod {{3,2,2},{5,1,3},{29,10,0}}
-viewHelp scan
-
+TEST///
+S = simplexMethod {{2,1,4},{1,2,3},{1,1,0}}
+M = matrix {{1, 0, .666667, -.333333, 0, 1.66667}, {0, 1, -.333333, .666667, 0, .666667}, {0, 0, .333333, .333333, 1, 2.33333}}
+--M = matrix {{1.0, 0, 2/3, -1/3, 0, 5/3}, {0, 1, -1/3, 2/3, 0, 2/3}, {0, 0, 1/3, 1/3, 1, 7/3}}
+S = flatten entries S
+M = flatten entries M
+scan(#S, l -> assert(toString S#l == toString M#l))
+scan(#M, l -> assert(toString S#l == toString M#l))
+///
 -----------------------------------------------------------------------------------------------------------------
 --DOCUMENTATION
 -----------------------------------------------------------------------------------------------------------------
@@ -152,7 +144,7 @@ beginDocumentation()
 
 doc ///
     Key 
-        LinearProgramming
+        VincentSimplex
     Headline
     	Simplex Method
     Description
@@ -187,17 +179,12 @@ doc ///
 	    which can be called $z$. Then all the varibles are moved to one side of the equation
 	    to allow it to be equal to a value of 0. This change is how the constraints and the function 
 	    will look in the outputted matrix. Let's look at an example:
-	    
-	    Maximize
-	    	$x_1 + x_2$
-		
-	    with the following contraints:
-		
-		$2x_1 + x_2 \leq 4$
-		$x_1 + 2x_2 \leq 3$
-		
-	    For $x_1, x_2 \geq 0$
-	    
+
+--	    Maximize $x_1 + x_2$ with the following contraints:
+--		$2x_1 + x_2 \leq 4$
+--		$x_1 + 2x_2 \leq 3$,
+--    	    for $x_1, x_2 \geq 0$.
+
 	    Given the constraints, the coefficients of each term are taken and put into the list. For
 	    the first constraint, the listed terms look like: {2,1,4}. For the second constraint, the
 	    listed terms look like: {1,2,3}
@@ -255,7 +242,7 @@ doc ///
 	    following example is worked out:
 	Example
 	    slackMatrix = {{2,1,1,0,0,4},{1,2,0,1,0,3},{(-1),(-1),0,0,1,0}}
-	    pivotList = findPivot slackMatrix
+	    -- pivotList = findPivot slackMatrix
 	Text
 	    Looking at the slackMatrix it is clear that the first negative element in the last row is located in the first
 	    column (column index 0). Using this, the lowest ratio is computed and it can be see that it is 2, which is located
@@ -289,7 +276,7 @@ doc ///
 	Example
 	    pivotList = {0,0}
 	    slackMatrix = {{2,1,1,0,0,4},{1,2,0,1,0,3},{(-1),(-1),0,0,1,0}}
-	    pivotedMatrix(pivotList, slackMatrix)
+	    --pivotedMatrix(pivotList, slackMatrix)
 	Text
 	    From the example, it can be seen that the row 0, which contains the pivot element, has been altered by a multiplication of (1/2). In addition, the
 	    entries in column 0, not including the pivot element, have become 0 entries by a simple row operation.
@@ -326,3 +313,35 @@ doc ///
 	    is 7/3.
 ///
     
+-----------------------------------------
+-----------------------------------------
+-----------------------------------------
+end
+-----------------------------------------
+-----------------------------------------
+-----------------------------------------
+
+--test
+
+restart
+uninstallPackage"VincentSimplex"
+restart
+installPackage"VincentSimplex"
+check "VincentSimplex"
+viewHelp VincentSimplex
+viewHelp check
+
+restart
+needsPackage"VincentSimplex"
+viewHelp assert
+toString simplexMethod {{2,1,4},{1,2,3},{1,1,0}} 
+simplexMethod {{2,1,4},{1,2,3},{1,1/2,0}}
+simplexMethod {{3,1,6},{1,(-1),2},{0,1,3},{2,1,0}}
+simplexMethod {{1,2,6},{2,1,6},{1,1,0}}
+simplexMethod {{1,6,2,8},{1,0,3,9},{(-7),1,3,0}} 
+simplexMethod {{1,1,1,6},{5,3,6,15},{5,3,1,0}}
+simplexMethod {{2,5,1},{1,3,4},{6,7,0}}
+simplexMethod {{2,3,1,5},{4,1,2,11},{3,4,2,8},{5,4,3,0}}
+simplexMethod {{3,2,2},{5,1,3},{29,10,0}}
+viewHelp scan
+
